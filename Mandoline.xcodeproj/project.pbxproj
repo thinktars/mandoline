@@ -8,9 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		09A0F64AFA3EDC1721C3BDEF /* ScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6E238C620CE5B4963865CC /* ScannerService.swift */; };
+		D98F7222D7A87E83ACF4A6F4 /* FontLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761D240A2D765D2208535813 /* FontLoader.swift */; };
 		1DED4B36A9728E20F6AAADA5 /* ProcessedFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */; };
 		31ECC61489E6A04C66B7E318 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D3730FFDE66D906A45CC759 /* Assets.xcassets */; };
-		4B297D52CC57CC1E06399698 /* Merriweather.zip in Resources */ = {isa = PBXBuildFile; fileRef = C149A310E122DA60730E82F8 /* Merriweather.zip */; };
+
 		4E52B98B5B95281B29AF1B03 /* MainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C8EF18ABB6C0A7F636B94F /* MainContentView.swift */; };
 		60B2E599B2F895D79B65157F /* MandolineApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BF5A94139A8B1D66D40432 /* MandolineApp.swift */; };
 		665EA51FBE0001E9931BCC52 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195B7F7C325D5DA1067C560E /* Theme.swift */; };
@@ -31,12 +32,13 @@
 		39B2FB86EF44CCDE778662F6 /* FolderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderManager.swift; sourceTree = "<group>"; };
 		46BF5A94139A8B1D66D40432 /* MandolineApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MandolineApp.swift; sourceTree = "<group>"; };
 		5B6E238C620CE5B4963865CC /* ScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerService.swift; sourceTree = "<group>"; };
+		761D240A2D765D2208535813 /* FontLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontLoader.swift; sourceTree = "<group>"; };
 		6110C2469D16E18F1B17BB61 /* ActionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionService.swift; sourceTree = "<group>"; };
 		6BC9493867B6A1A63469E8D3 /* MediaViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaViewer.swift; sourceTree = "<group>"; };
 		92947600253739DB7665C90A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		A210223AADE1A13E4FFBDC8C /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 		BCBDD1E7736D826D0D4972D6 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
-		C149A310E122DA60730E82F8 /* Merriweather.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = Merriweather.zip; sourceTree = "<group>"; };
+
 		D0C80E166EC8BBFE8A6F4B90 /* Merriweather-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Bold.ttf"; sourceTree = "<group>"; };
 		F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessedFile.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -74,7 +76,6 @@
 			isa = PBXGroup;
 			children = (
 				D0C80E166EC8BBFE8A6F4B90 /* Merriweather-Bold.ttf */,
-				C149A310E122DA60730E82F8 /* Merriweather.zip */,
 			);
 			path = Fonts;
 			sourceTree = "<group>";
@@ -113,6 +114,7 @@
 			isa = PBXGroup;
 			children = (
 				6110C2469D16E18F1B17BB61 /* ActionService.swift */,
+				761D240A2D765D2208535813 /* FontLoader.swift */,
 				39B2FB86EF44CCDE778662F6 /* FolderManager.swift */,
 				5B6E238C620CE5B4963865CC /* ScannerService.swift */,
 			);
@@ -177,7 +179,6 @@
 			files = (
 				31ECC61489E6A04C66B7E318 /* Assets.xcassets in Resources */,
 				A13888D740554B0ABEEDD69A /* Merriweather-Bold.ttf in Resources */,
-				4B297D52CC57CC1E06399698 /* Merriweather.zip in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,6 +190,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E7C7E2B4FB9E260C58BC204 /* ActionService.swift in Sources */,
+				D98F7222D7A87E83ACF4A6F4 /* FontLoader.swift in Sources */,
 				E8BEA43160B43B8B83B529D8 /* FolderManager.swift in Sources */,
 				D7E818BC10DDA0401D24BADD /* GalleryView.swift in Sources */,
 				D0E649A462D0D0109B6901FF /* KeyEventHandlingView.swift in Sources */,
