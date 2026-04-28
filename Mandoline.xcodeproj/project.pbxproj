@@ -8,10 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		09A0F64AFA3EDC1721C3BDEF /* ScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6E238C620CE5B4963865CC /* ScannerService.swift */; };
-		D98F7222D7A87E83ACF4A6F4 /* FontLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761D240A2D765D2208535813 /* FontLoader.swift */; };
 		1DED4B36A9728E20F6AAADA5 /* ProcessedFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */; };
 		31ECC61489E6A04C66B7E318 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D3730FFDE66D906A45CC759 /* Assets.xcassets */; };
-
 		4E52B98B5B95281B29AF1B03 /* MainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C8EF18ABB6C0A7F636B94F /* MainContentView.swift */; };
 		60B2E599B2F895D79B65157F /* MandolineApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BF5A94139A8B1D66D40432 /* MandolineApp.swift */; };
 		665EA51FBE0001E9931BCC52 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195B7F7C325D5DA1067C560E /* Theme.swift */; };
@@ -21,6 +19,7 @@
 		CEE21B36FF1529C5FB09E68B /* MediaViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC9493867B6A1A63469E8D3 /* MediaViewer.swift */; };
 		D0E649A462D0D0109B6901FF /* KeyEventHandlingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCBDD1E7736D826D0D4972D6 /* KeyEventHandlingView.swift */; };
 		D7E818BC10DDA0401D24BADD /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A210223AADE1A13E4FFBDC8C /* GalleryView.swift */; };
+		D98F7222D7A87E83ACF4A6F4 /* FontLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761D240A2D765D2208535813 /* FontLoader.swift */; };
 		E8BEA43160B43B8B83B529D8 /* FolderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39B2FB86EF44CCDE778662F6 /* FolderManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,13 +31,12 @@
 		39B2FB86EF44CCDE778662F6 /* FolderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderManager.swift; sourceTree = "<group>"; };
 		46BF5A94139A8B1D66D40432 /* MandolineApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MandolineApp.swift; sourceTree = "<group>"; };
 		5B6E238C620CE5B4963865CC /* ScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerService.swift; sourceTree = "<group>"; };
-		761D240A2D765D2208535813 /* FontLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontLoader.swift; sourceTree = "<group>"; };
 		6110C2469D16E18F1B17BB61 /* ActionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionService.swift; sourceTree = "<group>"; };
 		6BC9493867B6A1A63469E8D3 /* MediaViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaViewer.swift; sourceTree = "<group>"; };
+		761D240A2D765D2208535813 /* FontLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontLoader.swift; sourceTree = "<group>"; };
 		92947600253739DB7665C90A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		A210223AADE1A13E4FFBDC8C /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 		BCBDD1E7736D826D0D4972D6 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
-
 		D0C80E166EC8BBFE8A6F4B90 /* Merriweather-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Bold.ttf"; sourceTree = "<group>"; };
 		F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessedFile.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -149,9 +147,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-				};
+				LastUpgradeCheck = 2620;
 			};
 			buildConfigurationList = FF43702A5DA97981EA98887C /* Build configuration list for PBXProject "Mandoline" */;
 			developmentRegion = en;
@@ -211,6 +207,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -241,6 +238,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -257,6 +255,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -267,6 +266,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -297,6 +297,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -320,6 +321,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -330,11 +332,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Mandoline.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ATSApplicationFontsPath = .;
+				INFOPLIST_KEY_CFBundleDisplayName = Mandoline;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSMinimumSystemVersion = 15.0;
 				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
 				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
@@ -354,11 +362,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Mandoline.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ATSApplicationFontsPath = .;
+				INFOPLIST_KEY_CFBundleDisplayName = Mandoline;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSMinimumSystemVersion = 15.0;
 				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
 				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
