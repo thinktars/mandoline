@@ -2,7 +2,7 @@
 
 A lightning-fast macOS drive triage utility designed to help you slice through storage clutter. Mandoline provides a dedicated, focused interface to review media files using rapid-fire keyboard shortcuts—letting you keep, delete, or undo actions seamlessly.
 
-![Mandoline App Icon](./Sources/Assets.xcassets/AppIcon.appiconset/mandoline-appicon.png)
+<img src="./Sources/Assets.xcassets/AppIcon.appiconset/mandoline-appicon.png" width="128" alt="Mandoline App Icon">
 
 ## Download
 
