@@ -1,0 +1,399 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		09A0F64AFA3EDC1721C3BDEF /* ScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6E238C620CE5B4963865CC /* ScannerService.swift */; };
+		1DED4B36A9728E20F6AAADA5 /* ProcessedFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */; };
+		31ECC61489E6A04C66B7E318 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D3730FFDE66D906A45CC759 /* Assets.xcassets */; };
+		4B297D52CC57CC1E06399698 /* Merriweather.zip in Resources */ = {isa = PBXBuildFile; fileRef = C149A310E122DA60730E82F8 /* Merriweather.zip */; };
+		4E52B98B5B95281B29AF1B03 /* MainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C8EF18ABB6C0A7F636B94F /* MainContentView.swift */; };
+		60B2E599B2F895D79B65157F /* MandolineApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46BF5A94139A8B1D66D40432 /* MandolineApp.swift */; };
+		665EA51FBE0001E9931BCC52 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195B7F7C325D5DA1067C560E /* Theme.swift */; };
+		7E7C7E2B4FB9E260C58BC204 /* ActionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6110C2469D16E18F1B17BB61 /* ActionService.swift */; };
+		A13888D740554B0ABEEDD69A /* Merriweather-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D0C80E166EC8BBFE8A6F4B90 /* Merriweather-Bold.ttf */; };
+		CAC4BBE974E26FB9C0FFF239 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92947600253739DB7665C90A /* OnboardingView.swift */; };
+		CEE21B36FF1529C5FB09E68B /* MediaViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC9493867B6A1A63469E8D3 /* MediaViewer.swift */; };
+		D0E649A462D0D0109B6901FF /* KeyEventHandlingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCBDD1E7736D826D0D4972D6 /* KeyEventHandlingView.swift */; };
+		D7E818BC10DDA0401D24BADD /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A210223AADE1A13E4FFBDC8C /* GalleryView.swift */; };
+		E8BEA43160B43B8B83B529D8 /* FolderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39B2FB86EF44CCDE778662F6 /* FolderManager.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0D3730FFDE66D906A45CC759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		195B7F7C325D5DA1067C560E /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		1C4EA1232DD7D27D49DFA408 /* Mandoline.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mandoline.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		33C8EF18ABB6C0A7F636B94F /* MainContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainContentView.swift; sourceTree = "<group>"; };
+		39B2FB86EF44CCDE778662F6 /* FolderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderManager.swift; sourceTree = "<group>"; };
+		46BF5A94139A8B1D66D40432 /* MandolineApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MandolineApp.swift; sourceTree = "<group>"; };
+		5B6E238C620CE5B4963865CC /* ScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerService.swift; sourceTree = "<group>"; };
+		6110C2469D16E18F1B17BB61 /* ActionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionService.swift; sourceTree = "<group>"; };
+		6BC9493867B6A1A63469E8D3 /* MediaViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaViewer.swift; sourceTree = "<group>"; };
+		92947600253739DB7665C90A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		A210223AADE1A13E4FFBDC8C /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
+		BCBDD1E7736D826D0D4972D6 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
+		C149A310E122DA60730E82F8 /* Merriweather.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = Merriweather.zip; sourceTree = "<group>"; };
+		D0C80E166EC8BBFE8A6F4B90 /* Merriweather-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Bold.ttf"; sourceTree = "<group>"; };
+		F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessedFile.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		169FC800420BF3C558A3E30A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1C4EA1232DD7D27D49DFA408 /* Mandoline.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2272DEBA550E45D8ED6D3A4B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A210223AADE1A13E4FFBDC8C /* GalleryView.swift */,
+				BCBDD1E7736D826D0D4972D6 /* KeyEventHandlingView.swift */,
+				33C8EF18ABB6C0A7F636B94F /* MainContentView.swift */,
+				6BC9493867B6A1A63469E8D3 /* MediaViewer.swift */,
+				92947600253739DB7665C90A /* OnboardingView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		31203F03079396497323886F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8CA8C6017B894C2DBF30F837 /* Fonts */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		8CA8C6017B894C2DBF30F837 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				D0C80E166EC8BBFE8A6F4B90 /* Merriweather-Bold.ttf */,
+				C149A310E122DA60730E82F8 /* Merriweather.zip */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+		A11879612BCECC7C8D3A9863 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				0D3730FFDE66D906A45CC759 /* Assets.xcassets */,
+				46BF5A94139A8B1D66D40432 /* MandolineApp.swift */,
+				195B7F7C325D5DA1067C560E /* Theme.swift */,
+				F3980F1854BC291A8B3D697A /* Models */,
+				F8CB3D7E0D49660BBAB2E1DF /* Services */,
+				2272DEBA550E45D8ED6D3A4B /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		DCEBB8D95E7BA038C8F9035D = {
+			isa = PBXGroup;
+			children = (
+				31203F03079396497323886F /* Resources */,
+				A11879612BCECC7C8D3A9863 /* Sources */,
+				169FC800420BF3C558A3E30A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F3980F1854BC291A8B3D697A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		F8CB3D7E0D49660BBAB2E1DF /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				6110C2469D16E18F1B17BB61 /* ActionService.swift */,
+				39B2FB86EF44CCDE778662F6 /* FolderManager.swift */,
+				5B6E238C620CE5B4963865CC /* ScannerService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		36D6EA44F8BF32BF60445C73 /* Mandoline */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21A7DB46FB4F9119DD6EEACF /* Build configuration list for PBXNativeTarget "Mandoline" */;
+			buildPhases = (
+				DE14E1A7B6B1DE5D4C4DACC0 /* Sources */,
+				40560286360BE85217B160CD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Mandoline;
+			packageProductDependencies = (
+			);
+			productName = Mandoline;
+			productReference = 1C4EA1232DD7D27D49DFA408 /* Mandoline.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		49D8BDE30A47AEAEC9D021DB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = FF43702A5DA97981EA98887C /* Build configuration list for PBXProject "Mandoline" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = DCEBB8D95E7BA038C8F9035D;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 169FC800420BF3C558A3E30A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				36D6EA44F8BF32BF60445C73 /* Mandoline */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		40560286360BE85217B160CD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31ECC61489E6A04C66B7E318 /* Assets.xcassets in Resources */,
+				A13888D740554B0ABEEDD69A /* Merriweather-Bold.ttf in Resources */,
+				4B297D52CC57CC1E06399698 /* Merriweather.zip in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DE14E1A7B6B1DE5D4C4DACC0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7E7C7E2B4FB9E260C58BC204 /* ActionService.swift in Sources */,
+				E8BEA43160B43B8B83B529D8 /* FolderManager.swift in Sources */,
+				D7E818BC10DDA0401D24BADD /* GalleryView.swift in Sources */,
+				D0E649A462D0D0109B6901FF /* KeyEventHandlingView.swift in Sources */,
+				4E52B98B5B95281B29AF1B03 /* MainContentView.swift in Sources */,
+				60B2E599B2F895D79B65157F /* MandolineApp.swift in Sources */,
+				CEE21B36FF1529C5FB09E68B /* MediaViewer.swift in Sources */,
+				CAC4BBE974E26FB9C0FFF239 /* OnboardingView.swift in Sources */,
+				1DED4B36A9728E20F6AAADA5 /* ProcessedFile.swift in Sources */,
+				09A0F64AFA3EDC1721C3BDEF /* ScannerService.swift in Sources */,
+				665EA51FBE0001E9931BCC52 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0682B91953525CA2E8D0D734 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		0F9D9D4A6E7E69E0E4DCC16F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5A07798C394D26F8F1365F86 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Mandoline.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ATSApplicationFontsPath = .;
+				INFOPLIST_KEY_LSMinimumSystemVersion = 15.0;
+				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Rowan";
+				INFOPLIST_KEY_NSRemovableVolumesUsageDescription = "Mandoline needs access to external drives to help you review and clean up your media.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rowan.Mandoline;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		CB3116A703161E87FFC89AAE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Mandoline.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ATSApplicationFontsPath = .;
+				INFOPLIST_KEY_LSMinimumSystemVersion = 15.0;
+				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Mandoline needs access to your folders to help you review and clean up your media.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Rowan";
+				INFOPLIST_KEY_NSRemovableVolumesUsageDescription = "Mandoline needs access to external drives to help you review and clean up your media.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rowan.Mandoline;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		21A7DB46FB4F9119DD6EEACF /* Build configuration list for PBXNativeTarget "Mandoline" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A07798C394D26F8F1365F86 /* Debug */,
+				CB3116A703161E87FFC89AAE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FF43702A5DA97981EA98887C /* Build configuration list for PBXProject "Mandoline" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0F9D9D4A6E7E69E0E4DCC16F /* Debug */,
+				0682B91953525CA2E8D0D734 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 49D8BDE30A47AEAEC9D021DB /* Project object */;
+}
