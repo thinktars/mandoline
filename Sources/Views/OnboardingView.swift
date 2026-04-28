@@ -12,7 +12,7 @@ struct OnboardingView: View {
                 .scaledToFit()
                 .frame(width: 140, height: 140)
                 .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                .shadow(color: .black.opacity(0.1), radius: 12, y: 6)
+                .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.themeBorder, lineWidth: 1))
                 .padding(.bottom, 8)
             
             Text("Mandoline")
@@ -21,7 +21,7 @@ struct OnboardingView: View {
             
             Text("Slice down your bulky folders.")
                 .font(.system(size: 18, weight: .regular))
-                .foregroundColor(.themeBorder)
+                .foregroundColor(.themeSecondaryText)
             
             VStack(spacing: 16) {
                 Text("Mandoline can move your folder items to trash at your discretion. It does not monitor, log, or use any of your personal materials and runs fully offline. Any deletions made are at your own risk and will. This software is offered 'as-is' and free of any charge.")
@@ -32,9 +32,9 @@ struct OnboardingView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 20)
                     .frame(maxWidth: 600)
-                    .background(Color.white, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .background(Color.white, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 8)
+                        RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.themeBorder.opacity(0.3), lineWidth: 1)
                     )
             }
@@ -47,7 +47,7 @@ struct OnboardingView: View {
             }
             .buttonStyle(.plain)
             .padding(.vertical, 12)
-            .background(Color.themeContainer, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(Color.themeButtonSurface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color.themeBorder, lineWidth: 1)
@@ -65,13 +65,13 @@ struct OnboardingView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 28, height: 28)
-                        .foregroundColor(.themeBorder)
+                        .foregroundColor(.themeSecondaryText)
                 }
                 .buttonStyle(HoverLinkButtonStyle())
                 
                 Text("Open-sourced under the MIT Licence.")
                     .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.themeBorder)
+                    .foregroundColor(.themeSecondaryText)
             }
             .padding(.bottom, 20)
         }

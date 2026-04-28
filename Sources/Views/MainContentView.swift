@@ -18,127 +18,111 @@ struct MainContentView: View {
     @State private var isHoveringHelp: Bool = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            ZStack {
-                Color(NSColor.windowBackgroundColor).edgesIgnoringSafeArea(.all)
+        ZStack(alignment: .bottom) {
+            Color.themeBackground.edgesIgnoringSafeArea(.all)
+            
+            if scannerService.isScanning {
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                    Text("Scanning media...")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.secondary)
+                        .padding(.top)
+                }
+            } else if let currentMedia = scannerService.selectedURL {
+                MediaViewer(url: currentMedia)
+                    .id(currentMedia) // Force reload on change
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 120)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 
-                if scannerService.isScanning {
-                    VStack {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                        Text("Scanning media...")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(.secondary)
-                            .padding(.top)
-                    }
-                } else if let currentMedia = scannerService.selectedURL {
-                    MediaViewer(url: currentMedia)
-                        .id(currentMedia) // Force reload on change
-                    
-                    // Flash overlay
-                    flashColor
-                        .opacity(flashOpacity)
-                        .edgesIgnoringSafeArea(.all)
-                        .allowsHitTesting(false)
-                    
-                    // Keyboard Event Receiver
-                    // IMPORTANT: don't capture `currentMedia` here; always resolve selection at key-press time.
-                    KeyEventHandlingView { event in
-                        handleKeyPress(event)
-                    }
-                    .frame(width: 0, height: 0)
-                    
-                    VStack {
-                        // Top Left Return Button
-                        HStack {
+                // Flash overlay
+                flashColor
+                    .opacity(flashOpacity)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 120)
+                    .allowsHitTesting(false)
+                
+                // Keyboard Event Receiver
+                // IMPORTANT: don't capture `currentMedia` here; always resolve selection at key-press time.
+                KeyEventHandlingView { event in
+                    handleKeyPress(event)
+                }
+                .frame(width: 0, height: 0)
+                
+                VStack {
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("[\((scannerService.selectedIndex ?? 0) + 1)/\(scannerService.mediaFiles.count)] \(currentMedia.lastPathComponent)")
+                                .font(.system(size: 14, weight: .semibold))
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Text(fileSizeString(url: currentMedia))
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(12)
+                        .background(Color.themeBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.themeBorder, lineWidth: 1))
+
+                        Spacer()
+
+                        HStack(spacing: 10) {
                             Button(action: {
-                                folderManager.clearFolders()
+                                showShortcuts.toggle()
                             }) {
-                                Image(systemName: "door.left.hand.open")
-                                    .font(.system(size: 16, weight: .medium))
+                                Image(systemName: "questionmark")
+                                    .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(.themeText)
+                                    .frame(width: 20, height: 20)
                             }
                             .buttonStyle(.plain)
                             .padding(10)
-                            .background(Color.themeContainer, in: Circle())
+                            .background(Color.themeSubtleBackground, in: Circle())
                             .overlay(Circle().stroke(Color.themeBorder, lineWidth: 1))
-                            .padding(20)
-                            
-                            Spacer()
-                        }
-                        
-                        Spacer()
-                        
-                        // Bottom Status Bar
-                        HStack(alignment: .bottom) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("[\((scannerService.selectedIndex ?? 0) + 1)/\(scannerService.mediaFiles.count)] \(currentMedia.lastPathComponent)")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                                Text(fileSizeString(url: currentMedia))
-                                    .font(.system(size: 12, weight: .regular))
-                                    .foregroundColor(.secondary)
+                            .onHover { hover in
+                                isHoveringHelp = hover
                             }
-                            .padding(12)
-                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                            .shadow(color: .black.opacity(0.05), radius: 10, y: 5)
-                            
-                            Spacer()
-                            
-                            HStack {
-                                Button(action: {
-                                    showShortcuts.toggle()
-                                }) {
-                                    Image(systemName: "questionmark")
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundColor(.themeText)
-                                        .frame(width: 20, height: 20)
-                                }
-                                .buttonStyle(.plain)
-                                .padding(10)
-                                .background(Color.themeContainer, in: Circle())
-                                .overlay(Circle().stroke(Color.themeBorder, lineWidth: 1))
-                                .onHover { hover in
-                                    isHoveringHelp = hover
-                                }
-                                .onChange(of: isHoveringHelp) { _, new in
-                                    if new {
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                                            if self.isHoveringHelp {
-                                                self.showShortcuts = true
-                                            }
+                            .onChange(of: isHoveringHelp) { _, new in
+                                if new {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                                        if self.isHoveringHelp {
+                                            self.showShortcuts = true
                                         }
                                     }
                                 }
-                                .popover(isPresented: $showShortcuts, arrowEdge: .top) {
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("Keyboard Shortcuts")
-                                            .font(.system(size: 14, weight: .semibold))
-                                            .foregroundColor(.themeText)
-                                            .padding(.bottom, 2)
-                                        
-                                        ShortcutRowView(key: "←", action: "Previous Media", color: .themeText)
-                                        ShortcutRowView(key: "→", action: "Next Media", color: .themeText)
-                                        ShortcutRowView(key: "[", action: "Move to Trash", color: .red)
-                                        ShortcutRowView(key: "]", action: "Keep Media", color: .green)
-                                        ShortcutRowView(key: "Z", action: "Undo Last", color: .themeBorder)
-                                        ShortcutRowView(key: "⏎", action: "Reveal in Finder", color: .themeText)
-                                        ShortcutRowView(key: "Esc", action: "Menu", color: .themeText)
-                                    }
-                                    .padding(16)
-                                    .frame(width: 220)
-                                    .background(Color.themeBackground)
-                                }
                             }
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 16)
-                    }
-                    
-                } else {
-                    VStack {
-                        HStack {
+                            .popover(isPresented: $showShortcuts, arrowEdge: .top) {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Keyboard Shortcuts")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.themeText)
+                                        .padding(.bottom, 2)
+
+                                    ShortcutRowView(key: "←", action: "Previous Media", color: .themeText)
+                                    ShortcutRowView(key: "→", action: "Next Media", color: .themeText)
+                                    ShortcutRowView(key: "[", action: "Move to Trash", color: .themeDanger)
+                                    ShortcutRowView(key: "]", action: "Keep Media", color: .themeSuccess)
+                                    ShortcutRowView(key: "Z", action: "Undo Last", color: .themeBorder)
+                                    ShortcutRowView(key: "⏎", action: "Reveal in Finder", color: .themeText)
+                                    ShortcutRowView(key: "Esc", action: "Menu", color: .themeText)
+                                }
+                                .padding(16)
+                                .frame(width: 220)
+                                .background(Color.themeBackground)
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.themeBorder, lineWidth: 1)
+                                )
+                            }
+
                             Button(action: {
                                 folderManager.clearFolders()
                             }) {
@@ -148,7 +132,34 @@ struct MainContentView: View {
                             }
                             .buttonStyle(.plain)
                             .padding(10)
-                            .background(Color.themeContainer, in: Circle())
+                            .background(Color.themeSubtleBackground, in: Circle())
+                            .overlay(Circle().stroke(Color.themeBorder, lineWidth: 1))
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+
+                    Spacer()
+                }
+                
+                if !scannerService.mediaFiles.isEmpty {
+                    CarouselView(scannerService: scannerService)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 18)
+                }
+                
+            } else {
+                VStack {                        HStack {
+                            Button(action: {
+                                folderManager.clearFolders()
+                            }) {
+                                Image(systemName: "door.left.hand.open")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.themeText)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(10)
+                            .background(Color.themeSubtleBackground, in: Circle())
                             .overlay(Circle().stroke(Color.themeBorder, lineWidth: 1))
                             .padding(20)
                             
@@ -165,25 +176,28 @@ struct MainContentView: View {
                             .foregroundColor(.secondary)
                             .padding()
                         
-                        Button("Rescan Folders") {
+                        Button(action: {
                             Task {
                                 await scannerService.scan(folders: folderManager.selectedFolders, processedFiles: processedFiles)
                             }
+                        }) {
+                            Text("Rescan Folders")
+                                .font(.system(size: 14, weight: .medium))
+                                .padding(.horizontal, 20)
                         }
-                        .font(.system(size: 14, weight: .medium))
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.plain)
+                        .padding(.vertical, 10)
+                        .background(Color.themeButtonSurface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.themeBorder, lineWidth: 1)
+                        )
+                        .foregroundColor(.themeText)
                         .controlSize(.large)
                         
                         Spacer()
                     }
                 }
-            }
-            
-            // The Bottom Filmstrip Carousel
-            if !scannerService.mediaFiles.isEmpty && !scannerService.isScanning {
-                Divider()
-                CarouselView(scannerService: scannerService)
-            }
         }
         .onAppear {
             Task {
@@ -213,7 +227,7 @@ struct MainContentView: View {
             scannerService.selectNext()
         case "[": // Trash
             NSSound(contentsOfFile: "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/dock/drag to trash.aif", byReference: true)?.play()
-            triggerFlash(color: .red)
+            triggerFlash(color: .themeDanger)
             if actionService.trash(url: currentMedia, roots: folderManager.selectedFolders, context: modelContext) {
                 scannerService.removeFromQueue(url: currentMedia)
             } else {
@@ -221,7 +235,7 @@ struct MainContentView: View {
                 NSSound(contentsOfFile: "/System/Library/Sounds/Basso.aiff", byReference: true)?.play()
             }
         case "]": // Keep
-            triggerFlash(color: .green)
+            triggerFlash(color: .themeSuccess)
             if actionService.keep(url: currentMedia, context: modelContext) {
                 scannerService.removeFromQueue(url: currentMedia)
             } else {
@@ -282,7 +296,7 @@ struct CarouselView: View {
                             .cornerRadius(4)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 4)
-                                    .stroke(isActive ? Color.accentColor : Color.themeBorder.opacity(0.5), lineWidth: isActive ? 2 : 1)
+                                    .stroke(isActive ? Color.themePrimaryAction : Color.themeBorder.opacity(0.5), lineWidth: isActive ? 2 : 1)
                             )
                             .id(url.path)
                             .onTapGesture {
@@ -293,8 +307,12 @@ struct CarouselView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
             }
-            .background(Color.themeContainer)
-            .frame(height: 76) // 60 for image + 16 vertical padding
+            .background(Color.themeSubtleBackground, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.themeBorder, lineWidth: 1)
+            )
+            .frame(height: 84)
             .onChange(of: scannerService.selectedURL) { _, newSelection in
                 if let newSelection {
                     proxy.scrollTo(newSelection.path, anchor: .center)
@@ -364,8 +382,8 @@ struct ShortcutRowView: View {
                 .foregroundColor(.primary)
                 .frame(minWidth: 32)
                 .padding(.vertical, 4)
-                .background(Color(NSColor.windowBackgroundColor), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-                .shadow(color: .black.opacity(0.1), radius: 1, y: 1)
+                .background(Color.themeSubtleBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Color.themeBorder, lineWidth: 1))
                 
             Text(action)
                 .font(.system(size: 14, weight: .medium))

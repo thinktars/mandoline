@@ -48,18 +48,10 @@ struct FolderSelectionView: View {
         VStack(spacing: 24) {
             Spacer()
             
-            Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
-                .resizable()
-                .scaledToFit()
-                .frame(width: 100, height: 100)
-                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                .shadow(color: .black.opacity(0.1), radius: 12, y: 6)
-                .padding(.bottom, 8)
-                
-            Text("Mandoline")
+            Text("Welcome to Mandoline")
                 .font(.custom("Merriweather-Bold", size: 36))
                 .foregroundColor(.themeText)
-                .padding(.bottom, 4)
+                .padding(.bottom, 12)
                 
             Text("Choose the directory you want to scan for media. This app will find any subfolders by default too.")
                 .font(.system(size: 14, weight: .regular))
@@ -76,7 +68,7 @@ struct FolderSelectionView: View {
             }
             .buttonStyle(.plain)
             .padding(.vertical, 10)
-            .background(Color.themeContainer, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(Color.themeButtonSurface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color.themeBorder, lineWidth: 1)
@@ -88,7 +80,7 @@ struct FolderSelectionView: View {
             
                 Text("Thanks for using Mandoline - an app for Superhuman-style keyboard shortcuts to delete, keep or navigate through large folders.\n\n- Rowan (The Applied Research Studio)")
                     .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.themeBorder)
+                    .foregroundColor(.themeSecondaryText)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 440)
                     .padding(.horizontal, 20)
@@ -107,7 +99,7 @@ struct HoverLinkButtonStyle: ButtonStyle {
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundColor(isHovered ? .themeText : .themeBorder)
+            .foregroundColor(isHovered ? .themeText : .themeSecondaryText)
             .opacity(configuration.isPressed ? 0.7 : 1.0)
             .onHover { hover in
                 isHovered = hover
