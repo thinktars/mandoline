@@ -23,7 +23,7 @@ struct OnboardingView: View {
                 }
                 .staggeredReveal(1)
 
-                Text("Mandoline can move your folder items to trash at your discretion. It does not monitor, log, or use any of your personal materials and runs fully offline. Any deletions made are at your own risk and will. This software is offered 'as-is' and free of any charge.")
+                Text("Mandoline moves files you choose to the Trash. It runs fully offline and never logs or uses your data. Deletions are at your own risk. Free and provided as-is.")
                     .font(.system(size: 15, weight: .regular))
                     .foregroundColor(.themeText)
                     .multilineTextAlignment(.center)
@@ -37,7 +37,7 @@ struct OnboardingView: View {
                     .staggeredReveal(2)
 
                 Button(action: onAccept) {
-                    Text("I Understand & Agree")
+                    Text("I Understand")
                 }
                 .buttonStyle(PillButtonStyle(fontSize: 15))
                 .padding(.top, 4)
@@ -55,7 +55,7 @@ struct OnboardingView: View {
                     }
                     .buttonStyle(HoverLinkButtonStyle())
 
-                    Text("Open-sourced under the MIT Licence.")
+                    Text("Open source under the MIT licence.")
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(.themeSecondaryText)
                 }

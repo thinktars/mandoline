@@ -37,7 +37,7 @@ struct MediaViewer: View {
                         .resizable()
                         .scaledToFit()
                 } else {
-                    Text("Unsupported Media Format")
+                    Text("Unsupported format.")
                         .foregroundColor(.themeDanger)
                         .font(.system(size: 14, weight: .regular))
                 }
@@ -82,7 +82,7 @@ struct MediaViewer: View {
             if item.asset.isPlayable {
                 newPlayer.play()
             } else {
-                playbackError = "This video format is not playable on macOS."
+                playbackError = "This video can’t be played on macOS."
             }
         } else {
             isVideo = false

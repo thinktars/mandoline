@@ -25,7 +25,7 @@ struct MainContentView: View {
                 VStack {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
-                    Text("Scanning media...")
+                    Text("Scanning media…")
                         .font(.system(size: 14, weight: .regular))
                         .foregroundColor(.secondary)
                         .padding(.top)
@@ -75,16 +75,16 @@ struct MainContentView: View {
                             }
                             .popover(isPresented: $showShortcuts, arrowEdge: .top) {
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("Keyboard Shortcuts")
+                                    Text("Shortcuts")
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundColor(.themeText)
                                         .padding(.bottom, 2)
 
-                                    ShortcutRowView(key: "←", action: "Previous Media", color: .themeText)
-                                    ShortcutRowView(key: "→", action: "Next Media", color: .themeText)
-                                    ShortcutRowView(key: "[", action: "Move to Trash", color: .themeDanger)
-                                    ShortcutRowView(key: "]", action: "Keep Media", color: .themeSuccess)
-                                    ShortcutRowView(key: "Z", action: "Undo Last", color: .themeSecondaryText)
+                                    ShortcutRowView(key: "←", action: "Previous", color: .themeText)
+                                    ShortcutRowView(key: "→", action: "Next", color: .themeText)
+                                    ShortcutRowView(key: "[", action: "Trash", color: .themeDanger)
+                                    ShortcutRowView(key: "]", action: "Keep", color: .themeSuccess)
+                                    ShortcutRowView(key: "Z", action: "Undo", color: .themeSecondaryText)
                                     ShortcutRowView(key: "⏎", action: "Reveal in Finder", color: .themeText)
                                     ShortcutRowView(key: "Esc", action: "Menu", color: .themeText)
                                 }
@@ -160,7 +160,7 @@ struct MainContentView: View {
                             .font(.system(size: 24, weight: .semibold))
                             .foregroundColor(.primary)
                             .staggeredReveal(0)
-                        Text("No more media to review in the selected folders.")
+                        Text("Nothing left to review here.")
                             .font(.system(size: 14, weight: .regular))
                             .foregroundColor(.secondary)
                             .padding()
@@ -171,7 +171,7 @@ struct MainContentView: View {
                                 await scannerService.scan(folders: folderManager.selectedFolders, processedFiles: processedFiles)
                             }
                         }) {
-                            Text("Rescan Folders")
+                            Text("Rescan")
                         }
                         .buttonStyle(PillButtonStyle())
                         .staggeredReveal(2)
@@ -258,7 +258,7 @@ struct MainContentView: View {
             formatter.countStyle = .file
             return formatter.string(fromByteCount: size)
         } catch {
-            return "Unknown Size"
+            return "Unknown size"
         }
     }
 }
