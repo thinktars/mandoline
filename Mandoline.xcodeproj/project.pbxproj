@@ -360,7 +360,10 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				ENABLE_USER_SELECTED_FILES = readwrite;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				MARKETING_VERSION = 1.0;
+				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_KEY_ATSApplicationFontsPath = .;
 				INFOPLIST_KEY_CFBundleDisplayName = Mandoline;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -390,7 +393,10 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				ENABLE_USER_SELECTED_FILES = readwrite;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				MARKETING_VERSION = 1.0;
+				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_KEY_ATSApplicationFontsPath = .;
 				INFOPLIST_KEY_CFBundleDisplayName = Mandoline;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";

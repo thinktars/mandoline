@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Mandoline</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Rowan</string>
+	<key>ATSApplicationFontsPath</key>
+	<string>.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Mandoline needs access to your folders to help you review and clean up your media.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Mandoline needs access to your folders to help you review and clean up your media.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Mandoline needs access to your folders to help you review and clean up your media.</string>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>Mandoline needs access to external drives to help you review and clean up your media.</string>
+
+	<!-- Sparkle auto-update configuration -->
+	<!-- TODO: point this at your hosted appcast (e.g. a GitHub Release asset). -->
+	<key>SUFeedURL</key>
+	<string>https://github.com/thinktars/mandoline/releases/latest/download/appcast.xml</string>
+	<!-- TODO: replace with the EdDSA public key printed by Sparkle's generate_keys. -->
+	<key>SUPublicEDKey</key>
+	<string>REPLACE_WITH_SPARKLE_PUBLIC_ED_KEY</string>
+	<!-- Required for sandboxed apps so Sparkle can install via its XPC service. -->
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<!-- Manual checks only until the feed/key are configured; flip to true later. -->
+	<key>SUEnableAutomaticChecks</key>
+	<false/>
+</dict>
+</plist>
