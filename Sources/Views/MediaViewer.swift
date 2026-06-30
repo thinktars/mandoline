@@ -12,14 +12,11 @@ struct MediaViewer: View {
     var body: some View {
         ZStack {
             if isVideo {
-                if let player = player {
-                    VideoPlayer(player: player)
-                        .onAppear {
-                            player.play()
-                        }
-                        .onDisappear {
-                            player.pause()
-                        }
+                if let player {
+                    // Use AppKit's AVPlayerView via NSViewRepresentable instead of
+                    // SwiftUI's VideoPlayer: the latter crashes on instantiation
+                    // through _AVKit_SwiftUI on this macOS/SDK combination.
+                    PlayerView(player: player)
                 }
 
                 if let playbackError {
@@ -87,6 +84,26 @@ struct MediaViewer: View {
         } else {
             isVideo = false
             player = nil
+        }
+    }
+}
+
+/// AppKit-backed video view. Avoids SwiftUI's `VideoPlayer`, which crashes
+/// during view instantiation via `_AVKit_SwiftUI`.
+private struct PlayerView: NSViewRepresentable {
+    let player: AVPlayer
+
+    func makeNSView(context: Context) -> AVPlayerView {
+        let view = AVPlayerView()
+        view.player = player
+        view.controlsStyle = .inline
+        view.videoGravity = .resizeAspect
+        return view
+    }
+
+    func updateNSView(_ nsView: AVPlayerView, context: Context) {
+        if nsView.player !== player {
+            nsView.player = player
         }
     }
 }
