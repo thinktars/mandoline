@@ -1,6 +1,34 @@
 import SwiftUI
 import AppKit
 
+// Configures the host NSWindow so the titlebar is a seamless part of the UI:
+// fully transparent with no title, no separator line, and draggable from the
+// background. The visible "current folder" label is drawn in SwiftUI instead
+// of the native title so it can be centered and color-matched to the content.
+struct WindowConfigurator: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async { apply(to: view.window) }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async { apply(to: nsView.window) }
+    }
+
+    private func apply(to window: NSWindow?) {
+        guard let window else { return }
+        // Let the SwiftUI content (themeBackground) flow under the titlebar so
+        // the bar is a seamless part of the UI — no color step, no separator.
+        window.styleMask.insert(.fullSizeContentView)
+        window.titlebarAppearsTransparent = true
+        window.titlebarSeparatorStyle = .none
+        window.titleVisibility = .hidden
+        window.title = ""
+        window.isMovableByWindowBackground = true
+    }
+}
+
 // Invisible view to catch keyboard events globally within the window
 struct KeyEventHandlingView: NSViewRepresentable {
     var onKeyPress: (String) -> Void
