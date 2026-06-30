@@ -2,81 +2,67 @@ import SwiftUI
 
 struct OnboardingView: View {
     var onAccept: () -> Void
-    
+
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
-                .resizable()
-                .scaledToFit()
-                .frame(width: 140, height: 140)
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.themeBorder, lineWidth: 1))
-                .padding(.bottom, 8)
-            
-            Text("Mandoline")
-                .font(.custom("Merriweather-Bold", size: 36))
-                .foregroundColor(.themeText)
-            
-            Text("Slice down your bulky folders.")
-                .font(.system(size: 18, weight: .regular))
-                .foregroundColor(.themeSecondaryText)
-            
-            VStack(spacing: 16) {
+        CenteredScrollContainer(maxContentWidth: 560) {
+            VStack(spacing: 20) {
+                Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 120, height: 120)
+                    .staggeredReveal(0)
+
+                VStack(spacing: 8) {
+                    Text("Mandoline")
+                        .font(.custom("Merriweather-Bold", size: 34))
+                        .foregroundColor(.themeText)
+
+                    Text("Slice down your bulky folders.")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(.themeSecondaryText)
+                }
+                .staggeredReveal(1)
+
                 Text("Mandoline can move your folder items to trash at your discretion. It does not monitor, log, or use any of your personal materials and runs fully offline. Any deletions made are at your own risk and will. This software is offered 'as-is' and free of any charge.")
-                    .font(.system(size: 16, weight: .regular))
+                    .font(.system(size: 15, weight: .regular))
                     .foregroundColor(.themeText)
                     .multilineTextAlignment(.center)
+                    .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 20)
-                    .frame(maxWidth: 600)
-                    .background(Color.white, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.themeBorder.opacity(0.3), lineWidth: 1)
-                    )
-            }
-            .padding(.vertical, 20)
-            
-            Button(action: onAccept) {
-                Text("I Understand & Agree")
-                    .font(.system(size: 15, weight: .medium))
-                    .padding(.horizontal, 20)
-            }
-            .buttonStyle(.plain)
-            .padding(.vertical, 12)
-            .background(Color.themeButtonSurface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.themeBorder, lineWidth: 1)
-            )
-            .foregroundColor(.themeText)
-            .controlSize(.large)
-            
-            Spacer()
-            
-            Spacer()
-            
-            VStack(spacing: 8) {
-                Link(destination: URL(string: "https://github.com/thinktars/mandoline")!) {
-                    Image("github-circle", bundle: .main)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 28, height: 28)
+                    .frame(maxWidth: .infinity)
+                    .cardSurface(cornerRadius: 14)
+                    .padding(.top, 4)
+                    .staggeredReveal(2)
+
+                Button(action: onAccept) {
+                    Text("I Understand & Agree")
+                }
+                .buttonStyle(PillButtonStyle(fontSize: 15))
+                .padding(.top, 4)
+                .staggeredReveal(3)
+
+                VStack(spacing: 8) {
+                    Link(destination: URL(string: "https://github.com/thinktars/mandoline")!) {
+                        Image("github-circle", bundle: .main)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 26, height: 26)
+                            .foregroundColor(.themeSecondaryText)
+                            .frame(width: 40, height: 40)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(HoverLinkButtonStyle())
+
+                    Text("Open-sourced under the MIT Licence.")
+                        .font(.system(size: 13, weight: .regular))
                         .foregroundColor(.themeSecondaryText)
                 }
-                .buttonStyle(HoverLinkButtonStyle())
-                
-                Text("Open-sourced under the MIT Licence.")
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.themeSecondaryText)
+                .padding(.top, 8)
+                .staggeredReveal(4)
             }
-            .padding(.bottom, 20)
         }
-        .padding(60)
-        .frame(minWidth: 700, idealWidth: 800, maxWidth: .infinity, minHeight: 600, idealHeight: 700, maxHeight: .infinity)
         .background(Color.themeBackground)
     }
 }
