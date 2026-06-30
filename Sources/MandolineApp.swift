@@ -1,10 +1,20 @@
 import SwiftUI
 import SwiftData
+import Combine
+import Sparkle
 
 @main
 struct MandolineApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var folderManager = FolderManager()
+
+    /// Sparkle updater. Starts on launch; performs checks on demand (and
+    /// automatically once a feed URL + public key are configured).
+    private let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
 
     init() {
         FontLoader.registerBundledFonts()
@@ -21,6 +31,9 @@ struct MandolineApp: App {
         .windowResizability(.contentMinSize)
         .windowStyle(.hiddenTitleBar)
         .commands {
+            CommandGroup(after: .appInfo) {
+                CheckForUpdatesView(updater: updaterController.updater)
+            }
             CommandMenu("Go to Recent") {
                 if folderManager.recentFolders.isEmpty {
                     Button("No recent folders") {}
@@ -34,6 +47,35 @@ struct MandolineApp: App {
                 }
             }
         }
+    }
+}
+
+/// Tracks whether Sparkle can currently check for updates so the menu item is
+/// correctly enabled/disabled.
+final class CheckForUpdatesViewModel: ObservableObject {
+    @Published var canCheckForUpdates = false
+
+    init(updater: SPUUpdater) {
+        updater.publisher(for: \.canCheckForUpdates)
+            .assign(to: &$canCheckForUpdates)
+    }
+}
+
+/// The "Check for Updates…" menu command.
+struct CheckForUpdatesView: View {
+    @ObservedObject private var viewModel: CheckForUpdatesViewModel
+    private let updater: SPUUpdater
+
+    init(updater: SPUUpdater) {
+        self.updater = updater
+        self.viewModel = CheckForUpdatesViewModel(updater: updater)
+    }
+
+    var body: some View {
+        Button("Check for Updates…") {
+            updater.checkForUpdates()
+        }
+        .disabled(!viewModel.canCheckForUpdates)
     }
 }
 
