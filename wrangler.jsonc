@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mandoline-site",
+  "main": "src/index.js",
+  "compatibility_date": "2026-06-25",
+  "assets": {
+    "directory": "./web",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mandoline-signups",
+      "database_id": "373c8ace-6e66-4f04-8c95-390ad916d5ba",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
