@@ -32,5 +32,9 @@ if [ -d "$APP_SUPPORT" ]; then
   rm -f "$APP_SUPPORT"/default.store "$APP_SUPPORT"/default.store-shm "$APP_SUPPORT"/default.store-wal
 fi
 
+# Always show the onboarding splash during testing by clearing its flag.
+# Recent folders are intentionally preserved so the recents UI can be tested.
+defaults delete "$BUNDLE_ID" HasAcceptedOnboarding >/dev/null 2>&1 || true
+
 COUNT=$(find "$TEST_MEDIA_DIR" -maxdepth 1 -type f ! -name ".*" | wc -l | tr -d ' ')
-echo "[reseed] TestMedia reset with $COUNT media file(s); processed-file store cleared."
+echo "[reseed] TestMedia reset with $COUNT media file(s); processed-file store cleared; onboarding reset."
