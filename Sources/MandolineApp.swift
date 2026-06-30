@@ -8,13 +8,21 @@ struct MandolineApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var folderManager = FolderManager()
 
-    /// Sparkle updater. Starts on launch; performs checks on demand (and
-    /// automatically once a feed URL + public key are configured).
+    /// Sparkle updater. Only starts once a real EdDSA public key is configured
+    /// (until then, starting it would fail its config check and alert on launch).
     private let updaterController = SPUStandardUpdaterController(
-        startingUpdater: true,
+        startingUpdater: MandolineApp.isUpdaterConfigured,
         updaterDelegate: nil,
         userDriverDelegate: nil
     )
+
+    /// True once `SUPublicEDKey` in Info.plist is set to a real key.
+    private static var isUpdaterConfigured: Bool {
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String else {
+            return false
+        }
+        return !key.isEmpty && key != "REPLACE_WITH_SPARKLE_PUBLIC_ED_KEY"
+    }
 
     init() {
         FontLoader.registerBundledFonts()
