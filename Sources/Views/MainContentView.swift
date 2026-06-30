@@ -31,47 +31,26 @@ struct MainContentView: View {
                         .padding(.top)
                 }
             } else if let currentMedia = scannerService.selectedURL {
-                MediaViewer(url: currentMedia)
-                    .id(currentMedia) // Force reload on change
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 120)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                
-                // Flash overlay
-                flashColor
-                    .opacity(flashOpacity)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 120)
-                    .allowsHitTesting(false)
-                
-                // Keyboard Event Receiver
-                // IMPORTANT: don't capture `currentMedia` here; always resolve selection at key-press time.
-                KeyEventHandlingView { event in
-                    handleKeyPress(event)
-                }
-                .frame(width: 0, height: 0)
-                
-                VStack {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 4) {
+                VStack(spacing: 0) {
+                    // MARK: Top bar (its own region — never overlaps the media)
+                    // The centered folder name lives in the window titlebar
+                    // (principal toolbar item); this row holds file info + controls,
+                    // inset to clear the titlebar / traffic lights.
+                    HStack(alignment: .center) {
+                        VStack(alignment: .leading, spacing: 2) {
                             Text("[\((scannerService.selectedIndex ?? 0) + 1)/\(scannerService.mediaFiles.count)] \(currentMedia.lastPathComponent)")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.themeText)
+                                .monospacedDigit()
                                 .lineLimit(1)
                                 .truncationMode(.middle)
                             Text(fileSizeString(url: currentMedia))
                                 .font(.system(size: 12, weight: .regular))
-                                .foregroundColor(.secondary)
+                                .monospacedDigit()
+                                .foregroundColor(.themeSecondaryText)
                         }
-                        .padding(12)
-                        .background(Color.themeBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.themeBorder, lineWidth: 1))
 
-                        Spacer()
+                        Spacer(minLength: 16)
 
                         HStack(spacing: 10) {
                             Button(action: {
@@ -80,12 +59,8 @@ struct MainContentView: View {
                                 Image(systemName: "questionmark")
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(.themeText)
-                                    .frame(width: 20, height: 20)
                             }
-                            .buttonStyle(.plain)
-                            .padding(10)
-                            .background(Color.themeSubtleBackground, in: Circle())
-                            .overlay(Circle().stroke(Color.themeBorder, lineWidth: 1))
+                            .buttonStyle(CircleIconButtonStyle())
                             .onHover { hover in
                                 isHoveringHelp = hover
                             }
@@ -109,59 +84,72 @@ struct MainContentView: View {
                                     ShortcutRowView(key: "→", action: "Next Media", color: .themeText)
                                     ShortcutRowView(key: "[", action: "Move to Trash", color: .themeDanger)
                                     ShortcutRowView(key: "]", action: "Keep Media", color: .themeSuccess)
-                                    ShortcutRowView(key: "Z", action: "Undo Last", color: .themeBorder)
+                                    ShortcutRowView(key: "Z", action: "Undo Last", color: .themeSecondaryText)
                                     ShortcutRowView(key: "⏎", action: "Reveal in Finder", color: .themeText)
                                     ShortcutRowView(key: "Esc", action: "Menu", color: .themeText)
                                 }
                                 .padding(16)
                                 .frame(width: 220)
-                                .background(Color.themeBackground)
-                                .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.themeBorder, lineWidth: 1)
-                                )
+                                .cardSurface(cornerRadius: 12, fill: .themeBackground)
                             }
 
                             Button(action: {
-                                folderManager.clearFolders()
+                                returnToMenu()
                             }) {
                                 Image(systemName: "door.left.hand.open")
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.themeText)
                             }
-                            .buttonStyle(.plain)
-                            .padding(10)
-                            .background(Color.themeSubtleBackground, in: Circle())
-                            .overlay(Circle().stroke(Color.themeBorder, lineWidth: 1))
+                            .buttonStyle(CircleIconButtonStyle())
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 20)
+                    .padding(.top, 38)
+                    .padding(.bottom, 12)
 
-                    Spacer()
+                    // MARK: Media region (fills remaining space; nothing overlaps it)
+                    ZStack {
+                        MediaViewer(url: currentMedia)
+                            .id(currentMedia) // Force reload on change
+
+                        // Flash overlay confined to the media region.
+                        flashColor
+                            .opacity(flashOpacity)
+                            .allowsHitTesting(false)
+
+                        // Keyboard Event Receiver
+                        // IMPORTANT: don't capture `currentMedia`; resolve selection at key-press time.
+                        KeyEventHandlingView { event in
+                            handleKeyPress(event)
+                        }
+                        .frame(width: 0, height: 0)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.horizontal, 20)
+
+                    // MARK: Bottom bar (its own region)
+                    if !scannerService.mediaFiles.isEmpty {
+                        CarouselView(scannerService: scannerService)
+                            .padding(.horizontal, 20)
+                            .padding(.top, 14)
+                            .padding(.bottom, 18)
+                    }
                 }
-                
-                if !scannerService.mediaFiles.isEmpty {
-                    CarouselView(scannerService: scannerService)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 18)
-                }
-                
+
             } else {
-                VStack {                        HStack {
+                VStack {
+                        HStack {
                             Button(action: {
-                                folderManager.clearFolders()
+                                returnToMenu()
                             }) {
                                 Image(systemName: "door.left.hand.open")
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.themeText)
                             }
-                            .buttonStyle(.plain)
-                            .padding(10)
-                            .background(Color.themeSubtleBackground, in: Circle())
-                            .overlay(Circle().stroke(Color.themeBorder, lineWidth: 1))
-                            .padding(20)
+                            .buttonStyle(CircleIconButtonStyle())
+                            .padding(.horizontal, 20)
+                            .padding(.top, 36)
+                            .padding(.bottom, 20)
                             
                             Spacer()
                         }
@@ -171,10 +159,12 @@ struct MainContentView: View {
                         Text("All Caught Up!")
                             .font(.system(size: 24, weight: .semibold))
                             .foregroundColor(.primary)
+                            .staggeredReveal(0)
                         Text("No more media to review in the selected folders.")
                             .font(.system(size: 14, weight: .regular))
                             .foregroundColor(.secondary)
                             .padding()
+                            .staggeredReveal(1)
                         
                         Button(action: {
                             Task {
@@ -182,18 +172,9 @@ struct MainContentView: View {
                             }
                         }) {
                             Text("Rescan Folders")
-                                .font(.system(size: 14, weight: .medium))
-                                .padding(.horizontal, 20)
                         }
-                        .buttonStyle(.plain)
-                        .padding(.vertical, 10)
-                        .background(Color.themeButtonSurface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.themeBorder, lineWidth: 1)
-                        )
-                        .foregroundColor(.themeText)
-                        .controlSize(.large)
+                        .buttonStyle(PillButtonStyle())
+                        .staggeredReveal(2)
                         
                         Spacer()
                     }
@@ -207,6 +188,12 @@ struct MainContentView: View {
         }
     }
     
+    /// Commit staged deletions to the system Trash, then return to the menu.
+    private func returnToMenu() {
+        actionService.purgeStaged()
+        folderManager.clearFolders()
+    }
+
     private func triggerFlash(color: Color) {
         // Simple, non-animated flash.
         flashColor = color
@@ -253,7 +240,7 @@ struct MainContentView: View {
             if showShortcuts {
                 showShortcuts = false
             } else {
-                folderManager.clearFolders()
+                returnToMenu()
             }
         case "enter": // Reveal in Finder
             NSWorkspace.shared.activateFileViewerSelecting([currentMedia])
@@ -293,10 +280,10 @@ struct CarouselView: View {
 
                         ThumbnailView(url: url)
                             .frame(width: 80, height: 60)
-                            .cornerRadius(4)
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .overlay(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .stroke(isActive ? Color.themePrimaryAction : Color.themeBorder.opacity(0.5), lineWidth: isActive ? 2 : 1)
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                    .strokeBorder(isActive ? Color.themePrimaryAction : Color.black.opacity(0.1), lineWidth: isActive ? 2 : 1)
                             )
                             .id(url.path)
                             .onTapGesture {
@@ -307,11 +294,12 @@ struct CarouselView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
             }
-            .background(Color.themeSubtleBackground, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(Color.themeSubtleBackground, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color.themeBorder, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(Color.black.opacity(0.06), lineWidth: 1)
             )
+            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 3)
             .frame(height: 84)
             .onChange(of: scannerService.selectedURL) { _, newSelection in
                 if let newSelection {
