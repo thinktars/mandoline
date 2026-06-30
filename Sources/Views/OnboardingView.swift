@@ -14,7 +14,7 @@ struct OnboardingView: View {
 
                 VStack(spacing: 8) {
                     Text("Mandoline")
-                        .font(.custom("Merriweather-Bold", size: 34))
+                        .font(.system(size: 34, weight: .bold))
                         .foregroundColor(.themeText)
 
                     Text("Slice down your bulky folders.")

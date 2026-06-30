@@ -69,10 +69,11 @@ struct FolderSelectionView: View {
     var folderManager: FolderManager
     
     var body: some View {
-        CenteredScrollContainer(maxContentWidth: 520) {
+        VStack(spacing: 0) {
+            CenteredScrollContainer(maxContentWidth: 520) {
             VStack(spacing: 24) {
                 Text("Welcome to Mandoline")
-                    .font(.custom("Merriweather-Bold", size: 34))
+                    .font(.system(size: 34, weight: .bold))
                     .foregroundColor(.themeText)
                     .multilineTextAlignment(.center)
                     .staggeredReveal(0)
