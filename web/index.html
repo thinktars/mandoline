@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>Mandoline: Slice down your bulky folders</title>
+  <meta name="description" content="A lightning-fast macOS utility to triage media folders with keyboard shortcuts. Keep, trash, or undo in a tap." />
+  <link rel="icon" href="mandoline-appicon.png" />
+  <link rel="preload" href="fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/inter-600.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="icon-stack reveal" style="--i:0">
+        <img class="icon-card icon-card--l2" src="mandoline-appicon.png" alt="" aria-hidden="true" />
+        <img class="icon-card icon-card--l1" src="mandoline-appicon.png" alt="" aria-hidden="true" />
+        <img class="icon-card icon-card--r2" src="mandoline-appicon.png" alt="" aria-hidden="true" />
+        <img class="icon-card icon-card--r1" src="mandoline-appicon.png" alt="" aria-hidden="true" />
+        <img class="app-icon" src="mandoline-appicon.png" width="120" height="120" alt="Mandoline app icon" />
+      </div>
+      <h1 class="reveal" style="--i:1">Mandoline</h1>
+      <p class="tagline reveal" style="--i:2">Slice down your bulky folders.</p>
+      <p class="lede reveal" style="--i:3">
+        A lightning-fast macOS utility to triage media folders. Fly through your
+        images and videos with keyboard shortcuts to keep, trash, or undo in a tap.
+      </p>
+      <div class="cta reveal" style="--i:4">
+        <div class="download-group">
+          <p class="requires">Requires macOS 15 or later.</p>
+          <a class="button" href="Mandoline.dmg" download data-download>Download for macOS</a>
+        </div>
+        <a class="ghost-link" href="https://github.com/thinktars/mandoline">View source</a>
+      </div>
+      <p class="fineprint reveal" style="--i:5">
+        Independently distributed, so on first launch right-click the app and
+        choose <strong>Open</strong> to get past Gatekeeper.
+      </p>
+    </section>
+
+    <!-- Showcase: interactive dummy on desktop, static screenshot on mobile -->
+    <section class="showcase" aria-label="Mandoline in action">
+      <div class="demo" id="demo" tabindex="0"
+           aria-label="Interactive Mandoline demo. Click it, then use the arrow keys to navigate, the square-bracket keys to trash or keep, and Z to undo.">
+        <div class="demo-titlebar">
+          <span class="traffic"><i></i><i></i><i></i></span>
+          <span class="demo-path">~/Pictures/TestMedia</span>
+        </div>
+        <div class="demo-topbar">
+          <div class="demo-fileinfo">
+            <div class="demo-name">[<span id="demo-idx">1</span>/<span id="demo-count">7</span>] <span id="demo-fname">image_4.jpg</span></div>
+            <div class="demo-size"><span id="demo-fsize">0 KB</span> &middot; <span id="demo-ftotal">0 KB</span> in folder</div>
+          </div>
+          <div class="demo-actions">
+            <span class="demo-iconbtn" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M9.2 9a2.8 2.8 0 1 1 3.8 2.6c-.8.3-1.5 1-1.5 2v.4"/><circle cx="11.5" cy="17.5" r="0.6" fill="currentColor" stroke="none"/></svg>
+            </span>
+            <span class="demo-iconbtn" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M14 4h4v16h-4"/><path d="M14 12H4m0 0 3.5-3.5M4 12l3.5 3.5"/></svg>
+            </span>
+          </div>
+        </div>
+        <div class="demo-stage">
+          <img id="demo-media" src="demo/image_4.jpg" alt="" draggable="false" />
+          <div class="demo-flash" id="demo-flash"></div>
+          <div class="demo-empty" id="demo-empty" hidden>
+            <p class="demo-empty-title">All caught up</p>
+            <button class="demo-reset" id="demo-reset">Start over</button>
+          </div>
+        </div>
+        <div class="demo-carousel" id="demo-carousel"></div>
+      </div>
+
+      <p class="demo-hint" id="demo-hint">
+        Click the window, then try <kbd>&larr;</kbd> <kbd>&rarr;</kbd> to move,
+        <kbd>]</kbd> keep, <kbd>[</kbd> trash, <kbd>Z</kbd> undo.
+      </p>
+
+      <img class="demo-static shot" src="screenshot.png" alt="The Mandoline app reviewing a photo: the folder path in the title bar, a file counter with size readout, a large media preview, and a thumbnail carousel along the bottom" />
+    </section>
+
+    <!-- Features -->
+    <section class="features-section" aria-label="Features">
+      <h2 class="section-title">Everything you need to triage fast</h2>
+      <div class="features">
+        <div class="card">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg>
+          </span>
+          <h3>Blazing-fast review</h3>
+          <p>A big, distraction-free preview shows each image or video full-size, so you can decide at a glance.</p>
+        </div>
+        <div class="card">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>
+          </span>
+          <h3>Keyboard-first</h3>
+          <p>Keep, trash, undo, and navigate without the mouse to clear a whole folder with a few keys.</p>
+        </div>
+        <div class="card">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="5" height="8" rx="1.2"/><rect x="9.5" y="8" width="5" height="8" rx="1.2"/><rect x="16" y="8" width="5" height="8" rx="1.2"/></svg>
+          </span>
+          <h3>Thumbnail carousel</h3>
+          <p>A filmstrip along the bottom highlights where you are and lets you jump to any file instantly.</p>
+        </div>
+        <div class="card">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="8.5" width="19" height="7" rx="1.5"/><path d="M7 8.5v3M12 8.5v3M17 8.5v3"/></svg>
+          </span>
+          <h3>Always know where you are</h3>
+          <p>The current folder sits in the title bar, with a live position counter plus per-file and whole-folder size estimates.</p>
+        </div>
+        <div class="card">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h11a5 5 0 0 1 0 10H9"/><path d="M7.5 5.5 4 9l3.5 3.5"/></svg>
+          </span>
+          <h3>Safe &amp; reversible</h3>
+          <p>Deletions are staged and undoable for the whole session, then committed to the Trash, never a hard delete.</p>
+        </div>
+        <div class="card">
+          <span class="feature-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+          </span>
+          <h3>Private &amp; sandboxed</h3>
+          <p>Runs fully offline using native macOS APIs, touching only the folders you choose.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lightweight callout -->
+    <section class="lightweight" aria-label="Lightweight">
+      <span class="lightweight-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></svg>
+      </span>
+      <p class="lightweight-stat">Under 4.5&nbsp;MB</p>
+      <p class="lightweight-sub">No bloat, no Electron. Small, lightweight, and it just does the job.</p>
+    </section>
+
+    <!-- Shortcuts -->
+    <section class="shortcuts" aria-label="Keyboard shortcuts">
+      <h2>Keyboard shortcuts</h2>
+      <ul class="shortcut-list">
+        <li><span class="keys"><kbd>←</kbd><kbd>→</kbd></span> <span class="desc">Previous / next media</span></li>
+        <li><span class="keys"><kbd>]</kbd></span> <span class="desc">Keep</span></li>
+        <li><span class="keys"><kbd>[</kbd></span> <span class="desc">Move to Trash</span></li>
+        <li><span class="keys"><kbd>Z</kbd></span> <span class="desc">Undo last action</span></li>
+        <li><span class="keys"><kbd>⏎</kbd></span> <span class="desc">Reveal in Finder</span></li>
+        <li><span class="keys"><kbd>esc</kbd></span> <span class="desc">Back to menu</span></li>
+      </ul>
+    </section>
+
+    <p class="licence">Open source under the MIT licence.</p>
+  </main>
+
+  <footer>
+    <p class="credit">
+      A fast media cleanup app by
+      <a href="https://thinktars.com">The Applied Research Studio<span class="arrow" aria-hidden="true">↗</span></a>
+    </p>
+  </footer>
+
+  <dialog class="modal" id="signup-modal" aria-label="Download Mandoline">
+    <form class="modal-card" id="signup-form" novalidate>
+      <button type="button" class="modal-close" id="signup-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div class="modal-field">
+        <input class="modal-input" id="signup-email" type="email" inputmode="email"
+               autocomplete="email" placeholder="you@example.com" required aria-label="Email address" />
+        <button type="submit" class="modal-go" id="signup-submit" aria-label="Download now">
+          <svg class="go-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M8 11l4 4 4-4M5 19h14"/></svg>
+          <span class="go-spinner" aria-hidden="true"></span>
+        </button>
+      </div>
+      <p class="modal-error" id="signup-error" role="alert" hidden></p>
+      <p class="modal-fineprint">No spam, just the occasional product update.</p>
+    </form>
+  </dialog>
+
+  <script src="demo.js" defer></script>
+  <script src="signup.js" defer></script>
+</body>
+</html>
