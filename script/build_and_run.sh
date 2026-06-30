@@ -12,6 +12,10 @@ BUNDLE_ID="com.rowan.Mandoline"
 
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
+# Reseed TestMedia to a pristine state after the app is stopped, so each
+# build starts from a clean, testable folder.
+"$ROOT_DIR/script/reseed_testmedia.sh" || true
+
 xcodebuild \
   -project "$ROOT_DIR/Mandoline.xcodeproj" \
   -scheme "$APP_NAME" \
