@@ -69,3 +69,6 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 build/
+
+# Local-only sample video for testing (do not redistribute system assets)
+Seeds/*.mov
