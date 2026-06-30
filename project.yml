@@ -4,6 +4,11 @@ options:
   deploymentTarget:
     macOS: 15.0
 
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.9.3
+
 targets:
   Mandoline:
     type: application
@@ -11,15 +16,20 @@ targets:
     sources:
       - path: Sources
       - path: Resources
+    dependencies:
+      - package: Sparkle
+    info:
+      path: Info.plist
     settings:
       CODE_SIGN_ENTITLEMENTS: Mandoline.entitlements
+      ENABLE_APP_SANDBOX: YES
+      ENABLE_USER_SELECTED_FILES: readwrite
       ENABLE_USER_SCRIPT_SANDBOXING: YES
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-      GENERATE_INFOPLIST_FILE: YES
-      INFOPLIST_KEY_ATSApplicationFontsPath: "."
-      INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Rowan"
-      INFOPLIST_KEY_LSMinimumSystemVersion: "15.0"
-      INFOPLIST_KEY_NSDesktopFolderUsageDescription: "Mandoline needs access to your folders to help you review and clean up your media."
-      INFOPLIST_KEY_NSDocumentsFolderUsageDescription: "Mandoline needs access to your folders to help you review and clean up your media."
-      INFOPLIST_KEY_NSDownloadsFolderUsageDescription: "Mandoline needs access to your folders to help you review and clean up your media."
-      INFOPLIST_KEY_NSRemovableVolumesUsageDescription: "Mandoline needs access to external drives to help you review and clean up your media."
+      # Custom Info.plist (Info.plist) is used so Sparkle keys (SUFeedURL,
+      # SUPublicEDKey, SUEnableInstallerLauncherService) can be set.
+      GENERATE_INFOPLIST_FILE: NO
+      INFOPLIST_FILE: Info.plist
+      MARKETING_VERSION: "1.0"
+      CURRENT_PROJECT_VERSION: 1
+      INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.utilities"

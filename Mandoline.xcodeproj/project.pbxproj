@@ -16,6 +16,7 @@
 		7E7C7E2B4FB9E260C58BC204 /* ActionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6110C2469D16E18F1B17BB61 /* ActionService.swift */; };
 		A13888D740554B0ABEEDD69A /* Merriweather-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D0C80E166EC8BBFE8A6F4B90 /* Merriweather-Bold.ttf */; };
 		CAC4BBE974E26FB9C0FFF239 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92947600253739DB7665C90A /* OnboardingView.swift */; };
+		AA1100000000000000000B01 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = AA1100000000000000000D01 /* Sparkle */; };
 		0F1E2D3C4B5A69788796A5B4 /* CenteredScrollContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5C /* CenteredScrollContainer.swift */; };
 		CEE21B36FF1529C5FB09E68B /* MediaViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC9493867B6A1A63469E8D3 /* MediaViewer.swift */; };
 		D0E649A462D0D0109B6901FF /* KeyEventHandlingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCBDD1E7736D826D0D4972D6 /* KeyEventHandlingView.swift */; };
@@ -130,6 +131,7 @@
 			buildConfigurationList = 21A7DB46FB4F9119DD6EEACF /* Build configuration list for PBXNativeTarget "Mandoline" */;
 			buildPhases = (
 				DE14E1A7B6B1DE5D4C4DACC0 /* Sources */,
+				AA1100000000000000000F01 /* Frameworks */,
 				40560286360BE85217B160CD /* Resources */,
 			);
 			buildRules = (
@@ -138,6 +140,7 @@
 			);
 			name = Mandoline;
 			packageProductDependencies = (
+				AA1100000000000000000D01 /* Sparkle */,
 			);
 			productName = Mandoline;
 			productReference = 1C4EA1232DD7D27D49DFA408 /* Mandoline.app */;
@@ -160,6 +163,9 @@
 				en,
 			);
 			mainGroup = DCEBB8D95E7BA038C8F9035D;
+			packageReferences = (
+				AA1100000000000000000C01 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 169FC800420BF3C558A3E30A /* Products */;
@@ -170,6 +176,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA1100000000000000000F01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA1100000000000000000B01 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		40560286360BE85217B160CD /* Resources */ = {
@@ -414,6 +431,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA1100000000000000000C01 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA1100000000000000000D01 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA1100000000000000000C01 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 49D8BDE30A47AEAEC9D021DB /* Project object */;
 }
