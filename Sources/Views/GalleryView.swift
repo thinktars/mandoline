@@ -91,7 +91,8 @@ struct FolderSelectionView: View {
                 }) {
                     Text("Choose Folders...")
                 }
-                .buttonStyle(PillButtonStyle())
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
                 .padding(.top, 4)
                 .staggeredReveal(2)
 

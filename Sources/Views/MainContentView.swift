@@ -60,7 +60,9 @@ struct MainContentView: View {
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(.themeText)
                             }
-                            .buttonStyle(CircleIconButtonStyle())
+                            .buttonStyle(.bordered)
+                            .buttonBorderShape(.circle)
+                            .controlSize(.large)
                             .onHover { hover in
                                 isHoveringHelp = hover
                             }
@@ -100,7 +102,9 @@ struct MainContentView: View {
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.themeText)
                             }
-                            .buttonStyle(CircleIconButtonStyle())
+                            .buttonStyle(.bordered)
+                            .buttonBorderShape(.circle)
+                            .controlSize(.large)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -146,7 +150,9 @@ struct MainContentView: View {
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.themeText)
                             }
-                            .buttonStyle(CircleIconButtonStyle())
+                            .buttonStyle(.bordered)
+                            .buttonBorderShape(.circle)
+                            .controlSize(.large)
                             .padding(.horizontal, 20)
                             .padding(.top, 36)
                             .padding(.bottom, 20)
@@ -173,7 +179,8 @@ struct MainContentView: View {
                         }) {
                             Text("Rescan")
                         }
-                        .buttonStyle(PillButtonStyle())
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
                         .staggeredReveal(2)
                         
                         Spacer()

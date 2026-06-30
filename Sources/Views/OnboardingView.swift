@@ -39,7 +39,8 @@ struct OnboardingView: View {
                 Button(action: onAccept) {
                     Text("I Understand")
                 }
-                .buttonStyle(PillButtonStyle(fontSize: 15))
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
                 .padding(.top, 4)
                 .staggeredReveal(3)
 

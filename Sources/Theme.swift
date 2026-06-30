@@ -64,58 +64,6 @@ extension View {
 
 // MARK: - Button Styles
 
-/// Standard pill action button. Includes its own surface so the tactile
-/// press-scale wraps the whole control, and keeps every CTA visually consistent.
-struct PillButtonStyle: ButtonStyle {
-    var fontSize: CGFloat = 14
-    var cornerRadius: CGFloat = 10
-
-    @State private var isHovered = false
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: fontSize, weight: .medium))
-            .foregroundColor(.themeText)
-            .padding(.vertical, 11)
-            .padding(.horizontal, 24)
-            .background(
-                Color.themeButtonSurface.opacity(isHovered ? 0.85 : 1.0),
-                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(Color.black.opacity(0.08), lineWidth: 1)
-            )
-            .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
-            .shadow(color: Color.black.opacity(0.04), radius: 5, x: 0, y: 2)
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
-            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .onHover { isHovered = $0 }
-    }
-}
-
-/// Circular icon button with a guaranteed 40×40 hit area and press feedback.
-struct CircleIconButtonStyle: ButtonStyle {
-    @State private var isHovered = false
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .frame(width: 20, height: 20)
-            .padding(10)
-            .background(
-                Color.themeSubtleBackground.opacity(isHovered ? 0.85 : 1.0),
-                in: Circle()
-            )
-            .overlay(Circle().strokeBorder(Color.black.opacity(0.08), lineWidth: 1))
-            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
-            .contentShape(Circle())
-            .onHover { isHovered = $0 }
-    }
-}
-
 /// Row-style button for list entries (e.g. recent folders): subtle hover fill,
 /// hairline ring, and a gentle press-scale.
 struct RecentRowButtonStyle: ButtonStyle {
