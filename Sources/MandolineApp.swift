@@ -4,6 +4,7 @@ import SwiftData
 @main
 struct MandolineApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @State private var folderManager = FolderManager()
 
     init() {
         FontLoader.registerBundledFonts()
@@ -11,7 +12,7 @@ struct MandolineApp: App {
 
     var body: some Scene {
         WindowGroup {
-            GalleryView()
+            GalleryView(folderManager: folderManager)
                 .modelContainer(for: [ProcessedFile.self], isUndoEnabled: false)
                 .preferredColorScheme(.light)
                 .frame(minWidth: 720, minHeight: 640)
@@ -19,6 +20,20 @@ struct MandolineApp: App {
         .defaultSize(width: 1040, height: 860)
         .windowResizability(.contentMinSize)
         .windowStyle(.hiddenTitleBar)
+        .commands {
+            CommandMenu("Go to Recent") {
+                if folderManager.recentFolders.isEmpty {
+                    Button("No recent folders") {}
+                        .disabled(true)
+                } else {
+                    ForEach(folderManager.recentFolders, id: \.self) { url in
+                        Button(url.lastPathComponent) {
+                            folderManager.openRecent(url)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

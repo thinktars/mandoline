@@ -22,6 +22,20 @@ extension View {
     }
 }
 
+// MARK: - Paths
+
+extension URL {
+    /// Abbreviates a `/Users/<name>/…` path to `~/…`, like a shell prompt.
+    var abbreviatedTildePath: String {
+        let parts = path.split(separator: "/", omittingEmptySubsequences: true).map(String.init)
+        if parts.count >= 2, parts[0] == "Users" {
+            let rest = parts.dropFirst(2)
+            return rest.isEmpty ? "~" : "~/" + rest.joined(separator: "/")
+        }
+        return path
+    }
+}
+
 // MARK: - Surfaces
 
 extension View {
@@ -98,6 +112,31 @@ struct CircleIconButtonStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
             .contentShape(Circle())
+            .onHover { isHovered = $0 }
+    }
+}
+
+/// Row-style button for list entries (e.g. recent folders): subtle hover fill,
+/// hairline ring, and a gentle press-scale.
+struct RecentRowButtonStyle: ButtonStyle {
+    @State private var isHovered = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(
+                Color.themeSubtleBackground.opacity(isHovered ? 1.0 : 0.55),
+                in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Color.black.opacity(0.06), lineWidth: 1)
+            )
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .onHover { isHovered = $0 }
     }
 }

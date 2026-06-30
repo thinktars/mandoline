@@ -4,15 +4,32 @@ import AppKit
 
 @Observable
 final class FolderManager {
+    /// Folders selected for the current session.
     var selectedFolders: [URL] = []
-    
-    // Security-Scoped Bookmark handling
-    private let bookmarksKey = "MandolineBookmarks"
-    
+
+    /// Previously sliced folders, most-recent-first. Persisted as
+    /// security-scoped bookmarks so they can be reopened across launches.
+    private(set) var recentFolders: [URL] = []
+
+    /// How many recents the folder-selection screen surfaces.
+    static let displayRecentCount = 3
+
+    private let recentsKey = "MandolineRecentFolders"
+    private let maxRecents = 10
+
+    /// Recent bookmarks kept alongside their resolved URLs so we only mint a
+    /// fresh bookmark for a folder we currently have access to.
+    private var recentBookmarks: [String: Data] = [:]
+
     init() {
-        loadBookmarks()
+        loadRecents()
     }
-    
+
+    /// The recents shown as quick-access rows on the selection screen.
+    var displayRecents: [URL] {
+        Array(recentFolders.prefix(Self.displayRecentCount))
+    }
+
     @MainActor
     func selectFolder() {
         let panel = NSOpenPanel()
@@ -20,8 +37,8 @@ final class FolderManager {
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = true
         panel.prompt = "Allow Access"
-        panel.message = "Select folders to monitor and manage. Mandoline needs read/write access to delete files you choose to trash."
-        
+        panel.message = "Mandoline needs access to the folders you want to review and clean up."
+
         if panel.runModal() == .OK {
             for url in panel.urls {
                 guard !selectedFolders.contains(url) else { continue }
@@ -30,53 +47,91 @@ final class FolderManager {
                 // We must start accessing it for the duration of our usage.
                 if url.startAccessingSecurityScopedResource() {
                     selectedFolders.append(url)
-                    saveBookmark(for: url)
+                    addRecent(url)
                 } else {
                     print("Failed to start accessing security-scoped resource for \(url.path)")
                 }
             }
         }
     }
-    
-    private func saveBookmark(for url: URL) {
-        do {
-            let bookmarkData = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-            var bookmarks = UserDefaults.standard.dictionary(forKey: bookmarksKey) as? [String: Data] ?? [:]
-            bookmarks[url.path] = bookmarkData
-            UserDefaults.standard.set(bookmarks, forKey: bookmarksKey)
-        } catch {
-            print("Failed to save bookmark for \(url): \(error)")
-        }
-    }
-    
-    private func loadBookmarks() {
-        guard let bookmarks = UserDefaults.standard.dictionary(forKey: bookmarksKey) as? [String: Data] else { return }
-        
-        for (_, data) in bookmarks {
-            var isStale = false
-            do {
-                let url = try URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale)
-                if isStale {
-                    saveBookmark(for: url)
-                }
-                if url.startAccessingSecurityScopedResource() {
-                    selectedFolders.append(url)
-                }
-            } catch {
-                print("Failed to resolve bookmark: \(error)")
+
+    /// Reopen a previously sliced folder from the recents list.
+    @MainActor
+    func openRecent(_ url: URL) {
+        if url.startAccessingSecurityScopedResource() {
+            if !selectedFolders.contains(where: { $0.standardizedFileURL == url.standardizedFileURL }) {
+                selectedFolders.append(url)
             }
+            addRecent(url)
+        } else {
+            print("[Mandoline] Failed to access recent folder: \(url.path)")
         }
     }
-    
+
+    func clearFolders() {
+        stopAccessing()
+        selectedFolders.removeAll()
+        // Recents are intentionally preserved across folder switches.
+    }
+
+    /// Remove a folder from the recents list.
+    func removeRecent(_ url: URL) {
+        let path = url.standardizedFileURL.path
+        recentFolders.removeAll { $0.standardizedFileURL.path == path }
+        recentBookmarks.removeValue(forKey: path)
+        saveRecents()
+    }
+
     func stopAccessing() {
         for url in selectedFolders {
             url.stopAccessingSecurityScopedResource()
         }
     }
-    
-    func clearFolders() {
-        stopAccessing()
-        selectedFolders.removeAll()
-        UserDefaults.standard.removeObject(forKey: bookmarksKey)
+
+    // MARK: - Recents
+
+    private func addRecent(_ url: URL) {
+        let path = url.standardizedFileURL.path
+
+        // Reuse an existing bookmark, or mint one while we currently have access.
+        let bookmark = recentBookmarks[path]
+            ?? (try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil))
+        guard let bookmark else { return }
+
+        recentFolders.removeAll { $0.standardizedFileURL.path == path }
+        recentFolders.insert(url, at: 0)
+        recentBookmarks[path] = bookmark
+
+        if recentFolders.count > maxRecents {
+            let dropped = recentFolders[maxRecents...]
+            for url in dropped { recentBookmarks.removeValue(forKey: url.standardizedFileURL.path) }
+            recentFolders = Array(recentFolders.prefix(maxRecents))
+        }
+
+        saveRecents()
+    }
+
+    private func saveRecents() {
+        let datas = recentFolders.compactMap { recentBookmarks[$0.standardizedFileURL.path] }
+        UserDefaults.standard.set(datas, forKey: recentsKey)
+    }
+
+    private func loadRecents() {
+        guard let datas = UserDefaults.standard.array(forKey: recentsKey) as? [Data] else { return }
+
+        var urls: [URL] = []
+        for data in datas {
+            var isStale = false
+            guard let url = try? URL(
+                resolvingBookmarkData: data,
+                options: .withSecurityScope,
+                relativeTo: nil,
+                bookmarkDataIsStale: &isStale
+            ) else { continue }
+
+            urls.append(url)
+            recentBookmarks[url.standardizedFileURL.path] = data
+        }
+        recentFolders = urls
     }
 }

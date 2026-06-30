@@ -4,7 +4,7 @@ import AVKit
 
 struct GalleryView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var folderManager = FolderManager()
+    var folderManager: FolderManager
     @State private var scannerService = ScannerService()
     @State private var actionService = ActionService()
     
@@ -18,17 +18,7 @@ struct GalleryView: View {
         guard hasAcceptedOnboarding,
               !folderManager.selectedFolders.isEmpty,
               let url = scannerService.selectedURL else { return "" }
-        return Self.abbreviatedPath(url.deletingLastPathComponent())
-    }
-
-    /// Abbreviates a `/Users/<name>/…` path to `~/…`, like a shell prompt.
-    private static func abbreviatedPath(_ url: URL) -> String {
-        let parts = url.path.split(separator: "/", omittingEmptySubsequences: true).map(String.init)
-        if parts.count >= 2, parts[0] == "Users" {
-            let rest = parts.dropFirst(2)
-            return rest.isEmpty ? "~" : "~/" + rest.joined(separator: "/")
-        }
-        return url.path
+        return url.deletingLastPathComponent().abbreviatedTildePath
     }
     
     var body: some View {
@@ -87,7 +77,7 @@ struct FolderSelectionView: View {
                     .multilineTextAlignment(.center)
                     .staggeredReveal(0)
                     
-                Text("Choose the directory you want to scan for media. This app will find any subfolders by default too.")
+                Text("Pick a folder to scan. Subfolders are included automatically.")
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(.themeText)
                     .multilineTextAlignment(.center)
@@ -103,15 +93,63 @@ struct FolderSelectionView: View {
                 .buttonStyle(PillButtonStyle())
                 .padding(.top, 4)
                 .staggeredReveal(2)
+
+                if !folderManager.displayRecents.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Recently Sliced")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.themeSecondaryText)
+                            .textCase(.uppercase)
+                            .kerning(0.5)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        ForEach(folderManager.displayRecents, id: \.self) { url in
+                            Button {
+                                folderManager.openRecent(url)
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "folder")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.themeSecondaryText)
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        Text(url.lastPathComponent)
+                                            .font(.system(size: 13, weight: .medium))
+                                            .foregroundColor(.themeText)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+                                        Text(url.abbreviatedTildePath)
+                                            .font(.system(size: 11, weight: .regular))
+                                            .foregroundColor(.themeSecondaryText)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+                                    }
+                                    Spacer(minLength: 8)
+                                    Image(systemName: "arrow.up.right")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundColor(.themeSecondaryText)
+                                }
+                            }
+                            .buttonStyle(RecentRowButtonStyle())
+                            .contextMenu {
+                                Button("Remove from Recents", role: .destructive) {
+                                    folderManager.removeRecent(url)
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: 360)
+                    .padding(.top, 4)
+                    .staggeredReveal(3)
+                }
                 
-                Text("Thanks for using Mandoline - an app for Superhuman-style keyboard shortcuts to delete, keep or navigate through large folders.\n\n- Rowan (The Applied Research Studio)")
+                Text("Keyboard-first triage for large media folders — keep, trash, or skip in a tap.\n\n- Rowan (The Applied Research Studio)")
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(.themeSecondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 8)
-                    .staggeredReveal(3)
+                    .staggeredReveal(4)
             }
         }
         .background(Color.themeBackground)
