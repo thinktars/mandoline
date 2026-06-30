@@ -11,6 +11,18 @@ final class ScannerService {
 
     var isScanning = false
 
+    /// Total size of the media currently in the queue. Updated live as items
+    /// are trashed or restored.
+    var totalBytes: Int64 = 0
+
+    /// Cached per-file sizes (bytes), captured during the scan.
+    private var fileSizes: [URL: Int64] = [:]
+
+    /// Size of a specific media file, from the scan cache.
+    func size(of url: URL) -> Int64 {
+        fileSizes[url.standardizedFileURL] ?? 0
+    }
+
     var selectedIndex: Int? {
         guard let selectedURL else { return nil }
         return mediaFiles.firstIndex(of: selectedURL)
@@ -55,6 +67,8 @@ final class ScannerService {
 
         let wasSelected = (selectedURL == url)
 
+        totalBytes -= fileSizes[url] ?? 0
+
         var newFiles = mediaFiles
         newFiles.remove(at: removeIndex)
         mediaFiles = newFiles
@@ -80,6 +94,9 @@ final class ScannerService {
         if !newFiles.contains(url) {
             newFiles.append(url)
             newFiles.sort(by: { $0.path < $1.path })
+            let size = fileSizes[url] ?? Int64((try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize ?? 0)
+            fileSizes[url] = size
+            totalBytes += size
         }
         mediaFiles = newFiles
         selectedURL = url
@@ -98,14 +115,17 @@ final class ScannerService {
             self.isScanning = true
             self.mediaFiles.removeAll()
             self.selectedURL = nil
+            self.totalBytes = 0
+            self.fileSizes = [:]
         }
         
         var newMedia: [URL] = []
+        var sizes: [URL: Int64] = [:]
         
         for folder in folders {
             guard let enumerator = FileManager.default.enumerator(
                 at: folder,
-                includingPropertiesForKeys: [.isRegularFileKey],
+                includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey],
                 options: [.skipsHiddenFiles, .skipsPackageDescendants]
             ) else { continue }
             
@@ -114,13 +134,14 @@ final class ScannerService {
                 await Task.yield()
                 
                 do {
-                    let resourceValues = try fileURL.resourceValues(forKeys: [.isRegularFileKey])
+                    let resourceValues = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
                     guard resourceValues.isRegularFile == true else { continue }
                     
                     let ext = fileURL.pathExtension.lowercased()
                     if allowedExtensions.contains(ext) {
                         if !processedPaths.contains(fileURL.path) {
                             newMedia.append(fileURL)
+                            sizes[fileURL.standardizedFileURL] = Int64(resourceValues.fileSize ?? 0)
                         }
                     }
                 } catch {
@@ -133,9 +154,13 @@ final class ScannerService {
         // Let's sort alphabetically for predictability.
         newMedia.sort(by: { $0.path < $1.path })
         
-        let finalMedia = newMedia
+        let finalMedia = newMedia.map { $0.standardizedFileURL }
+        let finalSizes = sizes
+        let total = finalSizes.values.reduce(0, +)
         await MainActor.run {
-            self.mediaFiles = finalMedia.map { $0.standardizedFileURL }
+            self.mediaFiles = finalMedia
+            self.fileSizes = finalSizes
+            self.totalBytes = total
             self.selectedURL = self.mediaFiles.first
             self.isScanning = false
         }

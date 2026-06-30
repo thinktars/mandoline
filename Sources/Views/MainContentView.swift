@@ -44,7 +44,7 @@ struct MainContentView: View {
                                 .monospacedDigit()
                                 .lineLimit(1)
                                 .truncationMode(.middle)
-                            Text(fileSizeString(url: currentMedia))
+                            Text("\(fileSizeString(url: currentMedia))  ·  \(byteString(scannerService.totalBytes)) in folder")
                                 .font(.system(size: 12, weight: .regular))
                                 .monospacedDigit()
                                 .foregroundColor(.themeSecondaryText)
@@ -260,6 +260,14 @@ struct MainContentView: View {
         } catch {
             return "Unknown size"
         }
+    }
+
+    /// Human-readable byte count for the whole-folder estimate.
+    private func byteString(_ bytes: Int64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = [.useKB, .useMB, .useGB]
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: bytes)
     }
 }
 
