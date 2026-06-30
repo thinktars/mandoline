@@ -13,8 +13,20 @@ struct ActionRecord {
 
 @Observable
 final class ActionService {
+    /// Weak handle to the live instance so the app delegate can purge staged
+    /// files when the app quits, without threading references through the views.
+    static weak var current: ActionService?
+
+    /// Session undo history. Unbounded within a session (Option B): staged
+    /// deletions remain undoable until the user navigates away or quits.
     var history: [ActionRecord] = []
-    let maxUndo = 3
+
+    /// Roots into which we've created a `.mandoline-staging` directory.
+    private var stagedRoots: Set<URL> = []
+
+    init() {
+        ActionService.current = self
+    }
 
     // MARK: - Public API
 
@@ -30,7 +42,6 @@ final class ActionService {
         }
 
         history.append(ActionRecord(url: url, type: .kept, stagedURL: nil))
-        trimHistory()
         return true
     }
 
@@ -49,6 +60,7 @@ final class ActionService {
             print("[Mandoline] Refusing to stage-delete because file is not inside any selected root: \(url.path)")
             return false
         }
+        stagedRoots.insert(root.standardizedFileURL)
 
         // Mirror the original relative path under the staging directory to avoid name collisions.
         let relativePath = relativePath(from: root, to: url)
@@ -96,11 +108,10 @@ final class ActionService {
         }
 
         history.append(ActionRecord(url: url, type: .trashed, stagedURL: finalDestinationURL))
-        trimHistory()
         return true
     }
 
-    /// Undo the last keep/trash action (up to `maxUndo`).
+    /// Undo the last keep/trash action.
     @discardableResult
     func undo(context: ModelContext) -> (url: URL, type: ProcessedFile.ActionType)? {
         guard let last = history.popLast() else { return nil }
@@ -121,7 +132,6 @@ final class ActionService {
                 print("[Mandoline] Cannot resolve staged URL for undo: \(last.url.path)")
                 // Put it back so the user can try again.
                 history.append(last)
-                trimHistory()
                 return nil
             }
 
@@ -130,7 +140,6 @@ final class ActionService {
                     print("[Mandoline] Undo failed: staged file missing at \(trashedURL.path)")
                     // Put it back so the user can retry (in case of transient filesystem state).
                     history.append(last)
-                    trimHistory()
                     return nil
                 }
 
@@ -166,12 +175,29 @@ final class ActionService {
 
                 // Otherwise, put it back so the user can retry.
                 history.append(last)
-                trimHistory()
                 return nil
             }
         }
 
         return (restoredURL, last.type)
+    }
+
+    /// Commit all staged deletions by moving each root's staging directory to
+    /// the system Trash, then clear undo history. Called when the user leaves a
+    /// folder, returns to the menu, or quits the app.
+    func purgeStaged() {
+        let fm = FileManager.default
+        for root in stagedRoots {
+            let stagingRoot = root.appendingPathComponent(".mandoline-staging", isDirectory: true)
+            guard fm.fileExists(atPath: stagingRoot.path) else { continue }
+            do {
+                try fm.trashItem(at: stagingRoot, resultingItemURL: nil)
+            } catch {
+                print("[Mandoline] Failed to purge staging at \(stagingRoot.path): \(error)")
+            }
+        }
+        stagedRoots.removeAll()
+        history.removeAll()
     }
 
     // MARK: - SwiftData helpers
@@ -297,12 +323,6 @@ final class ActionService {
             return directory.appendingPathComponent(uuidName)
         } else {
             return directory.appendingPathComponent(uuidName).appendingPathExtension(ext)
-        }
-    }
-
-    private func trimHistory() {
-        if history.count > maxUndo {
-            history.removeFirst()
         }
     }
 }
