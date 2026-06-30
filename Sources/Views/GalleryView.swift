@@ -124,7 +124,7 @@ struct FolderSelectionView: View {
                                             .truncationMode(.middle)
                                     }
                                     Spacer(minLength: 8)
-                                    Image(systemName: "arrow.up.right")
+                                    Image(systemName: "chevron.right")
                                         .font(.system(size: 11, weight: .semibold))
                                         .foregroundColor(.themeSecondaryText)
                                 }
@@ -141,16 +141,12 @@ struct FolderSelectionView: View {
                     .padding(.top, 4)
                     .staggeredReveal(3)
                 }
-                
-                Text("Keyboard-first triage for large media folders — keep, trash, or skip in a tap.\n\n- Rowan (The Applied Research Studio)")
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.themeSecondaryText)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, 8)
-                    .staggeredReveal(4)
             }
+        }
+
+            StudioCreditLink()
+                .padding(.bottom, 20)
+                .staggeredReveal(4)
         }
         .background(Color.themeBackground)
     }
@@ -166,5 +162,45 @@ struct HoverLinkButtonStyle: ButtonStyle {
             .onHover { hover in
                 isHovered = hover
             }
+    }
+}
+
+/// Footer credit: "Made for everyone by The Applied Research Studio ↗".
+/// On hover the studio name darkens and the link-out icon grows with a
+/// smooth, bounce-free spring.
+struct StudioCreditLink: View {
+    @Environment(\.openURL) private var openURL
+    @State private var isHovered = false
+
+    private let url = URL(string: "https://thinktars.com")!
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Text("Made for everyone by")
+                .foregroundColor(.themeSecondaryText)
+
+            Button {
+                openURL(url)
+            } label: {
+                HStack(spacing: 3) {
+                    Text("The Applied Research Studio")
+                        .foregroundColor(isHovered ? .themeText : .themeSecondaryText)
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(isHovered ? .themeText : .themeSecondaryText)
+                        .scaleEffect(isHovered ? 1.2 : 1.0)
+                        .offset(x: isHovered ? 1 : 0, y: isHovered ? -1 : 0)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .pointerStyle(.link)
+            .onHover { hovering in
+                withAnimation(.spring(duration: 0.3, bounce: 0)) {
+                    isHovered = hovering
+                }
+            }
+        }
+        .font(.system(size: 13, weight: .regular))
     }
 }
