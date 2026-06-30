@@ -12,6 +12,25 @@ struct GalleryView: View {
     
     @State private var hasAcceptedOnboarding = UserDefaults.standard.bool(forKey: "HasAcceptedOnboarding")
     
+    /// The titlebar shows the path to the current folder (plain text, centered,
+    /// inline with the window controls) only when media is open — terminal-style.
+    private var windowTitle: String {
+        guard hasAcceptedOnboarding,
+              !folderManager.selectedFolders.isEmpty,
+              let url = scannerService.selectedURL else { return "" }
+        return Self.abbreviatedPath(url.deletingLastPathComponent())
+    }
+
+    /// Abbreviates a `/Users/<name>/…` path to `~/…`, like a shell prompt.
+    private static func abbreviatedPath(_ url: URL) -> String {
+        let parts = url.path.split(separator: "/", omittingEmptySubsequences: true).map(String.init)
+        if parts.count >= 2, parts[0] == "Users" {
+            let rest = parts.dropFirst(2)
+            return rest.isEmpty ? "~" : "~/" + rest.joined(separator: "/")
+        }
+        return url.path
+    }
+    
     var body: some View {
         ZStack {
             Color.themeBackground.edgesIgnoringSafeArea(.all)
@@ -30,7 +49,7 @@ struct GalleryView: View {
                     actionService: actionService,
                     processedFiles: processedFiles
                 )
-                .frame(minWidth: 1000, idealWidth: 1200, maxWidth: .infinity, minHeight: 700, idealHeight: 800, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .onAppear {
                     if let window = NSApp.windows.first {
                         window.center()
@@ -38,6 +57,21 @@ struct GalleryView: View {
                 }
             }
         }
+        .background(WindowConfigurator())
+        .overlay(alignment: .top) {
+            if !windowTitle.isEmpty {
+                Text(windowTitle)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.themeSecondaryText)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .padding(.horizontal, 90) // keep clear of the traffic lights
+                    .frame(height: 28)
+                    .frame(maxWidth: .infinity)
+                    .allowsHitTesting(false)
+            }
+        }
+        .ignoresSafeArea(.container, edges: .top)
     }
 }
 
@@ -45,52 +79,42 @@ struct FolderSelectionView: View {
     var folderManager: FolderManager
     
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            Text("Welcome to Mandoline")
-                .font(.custom("Merriweather-Bold", size: 36))
-                .foregroundColor(.themeText)
-                .padding(.bottom, 12)
+        CenteredScrollContainer(maxContentWidth: 520) {
+            VStack(spacing: 24) {
+                Text("Welcome to Mandoline")
+                    .font(.custom("Merriweather-Bold", size: 34))
+                    .foregroundColor(.themeText)
+                    .multilineTextAlignment(.center)
+                    .staggeredReveal(0)
+                    
+                Text("Choose the directory you want to scan for media. This app will find any subfolders by default too.")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.themeText)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .staggeredReveal(1)
                 
-            Text("Choose the directory you want to scan for media. This app will find any subfolders by default too.")
-                .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.themeText)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-            
-            Button(action: {
-                folderManager.selectFolder()
-            }) {
-                Text("Choose Folders...")
-                    .font(.system(size: 14, weight: .medium))
-                    .padding(.horizontal, 24)
-            }
-            .buttonStyle(.plain)
-            .padding(.vertical, 10)
-            .background(Color.themeButtonSurface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.themeBorder, lineWidth: 1)
-            )
-            .foregroundColor(.themeText)
-            .controlSize(.regular)
-            .padding(.top, 4)
-            .padding(.bottom, 24)
-            
+                Button(action: {
+                    folderManager.selectFolder()
+                }) {
+                    Text("Choose Folders...")
+                }
+                .buttonStyle(PillButtonStyle())
+                .padding(.top, 4)
+                .staggeredReveal(2)
+                
                 Text("Thanks for using Mandoline - an app for Superhuman-style keyboard shortcuts to delete, keep or navigate through large folders.\n\n- Rowan (The Applied Research Studio)")
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(.themeSecondaryText)
                     .multilineTextAlignment(.center)
-                    .frame(maxWidth: 440)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 24)
-                
-                Spacer()
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 8)
+                    .staggeredReveal(3)
             }
-            .padding(60)
-            .frame(minWidth: 700, idealWidth: 800, maxWidth: .infinity, minHeight: 600, idealHeight: 700, maxHeight: .infinity)
-            .background(Color.themeBackground)
+        }
+        .background(Color.themeBackground)
     }
 }
 
