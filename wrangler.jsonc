@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "mandoline-site",
+  "name": "mandoline",
   "main": "src/index.js",
   "compatibility_date": "2026-06-25",
   "assets": {
