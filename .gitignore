@@ -76,3 +76,6 @@ Seeds/*.mov
 # Node / Cloudflare Worker
 node_modules/
 .wrangler/
+
+# Local Pi subagent artifacts
+.pi-subagents/

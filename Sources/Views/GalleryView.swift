@@ -7,11 +7,25 @@ struct GalleryView: View {
     var folderManager: FolderManager
     @State private var scannerService = ScannerService()
     @State private var actionService = ActionService()
-    
+    @State private var indexService = IndexService()
+
     @Query private var processedFiles: [ProcessedFile]
-    
+
     @State private var hasAcceptedOnboarding = UserDefaults.standard.bool(forKey: "HasAcceptedOnboarding")
-    
+    @State private var flowStage: FlowStage = .indexingOptions
+    @State private var indexOptions = IndexOptions()
+    @State private var selectedCluster: MediaCluster?
+    @State private var indexingTask: Task<Void, Never>?
+    @State private var showExitConfirmation = false
+
+    private enum FlowStage {
+        case indexingOptions
+        case indexing
+        case clusters
+        case slicingFullFolder
+        case slicingCluster
+    }
+
     /// The titlebar shows the path to the current folder (plain text, centered,
     /// inline with the window controls) only when media is open — terminal-style.
     private var windowTitle: String {
@@ -20,11 +34,11 @@ struct GalleryView: View {
               let url = scannerService.selectedURL else { return "" }
         return url.deletingLastPathComponent().abbreviatedTildePath
     }
-    
+
     var body: some View {
         ZStack {
             Color.themeBackground.edgesIgnoringSafeArea(.all)
-            
+
             if !hasAcceptedOnboarding {
                 OnboardingView {
                     UserDefaults.standard.set(true, forKey: "HasAcceptedOnboarding")
@@ -33,18 +47,13 @@ struct GalleryView: View {
             } else if folderManager.selectedFolders.isEmpty {
                 FolderSelectionView(folderManager: folderManager)
             } else {
-                MainContentView(
-                    folderManager: folderManager,
-                    scannerService: scannerService,
-                    actionService: actionService,
-                    processedFiles: processedFiles
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .onAppear {
-                    if let window = NSApp.windows.first {
-                        window.center()
+                activeFolderView
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .onAppear {
+                        if let window = NSApp.windows.first {
+                            window.center()
+                        }
                     }
-                }
             }
         }
         .background(WindowConfigurator())
@@ -61,7 +70,278 @@ struct GalleryView: View {
                     .allowsHitTesting(false)
             }
         }
+        .alert("Close folder?", isPresented: $showExitConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Close Folder", role: .destructive) {
+                completeReturnToMenu()
+            }
+        } message: {
+            Text("The in-memory index and undo progress will be lost. Any staged deletions will be moved to Trash on exit/menu.")
+        }
         .ignoresSafeArea(.container, edges: .top)
+    }
+
+    @ViewBuilder
+    private var activeFolderView: some View {
+        switch flowStage {
+        case .indexingOptions:
+            IndexingOptionsView(
+                options: $indexOptions,
+                folderCount: folderManager.selectedFolders.count,
+                onStart: startIndexing,
+                onSkip: {
+                    selectedCluster = nil
+                    flowStage = .slicingFullFolder
+                },
+                onBack: closeFolderWithoutConfirmation
+            )
+
+        case .indexing:
+            IndexingProgressView(
+                scannerService: scannerService,
+                indexService: indexService,
+                onRetry: startIndexing,
+                onBackToOptions: returnToIndexingOptions,
+                onSkipToFullFolder: skipToFullFolderSlicer,
+                onCloseFolder: requestReturnToMenu
+            )
+
+        case .clusters:
+            ClusterCanvasView(
+                clusters: indexService.clusters,
+                indexService: indexService,
+                onSlice: { cluster in
+                    selectedCluster = cluster
+                    flowStage = .slicingCluster
+                },
+                onSliceFullFolder: skipToFullFolderSlicer,
+                onBackToOptions: returnToIndexingOptions,
+                onCloseFolder: requestReturnToMenu
+            )
+
+        case .slicingFullFolder:
+            MainContentView(
+                folderManager: folderManager,
+                scannerService: scannerService,
+                actionService: actionService,
+                processedFiles: processedFiles,
+                initialFiles: nil,
+                onRequestReturnToMenu: requestReturnToMenu
+            )
+            .id("full-folder-slicer")
+
+        case .slicingCluster:
+            MainContentView(
+                folderManager: folderManager,
+                scannerService: scannerService,
+                actionService: actionService,
+                processedFiles: processedFiles,
+                initialFiles: selectedCluster?.fileURLs ?? [],
+                onRequestReturnToMenu: requestReturnToMenu,
+                onRequestBackToClusters: returnToClusters
+            )
+            .id("cluster-slicer-\(selectedCluster?.id ?? -1)")
+        }
+    }
+
+    private var requiresExitConfirmation: Bool {
+        let hasIndex = flowStage == .indexing || !indexService.clusters.isEmpty || !indexService.embedderName.isEmpty
+        return hasIndex || actionService.hasUndoProgress
+    }
+
+    private func startIndexing() {
+        indexingTask?.cancel()
+        selectedCluster = nil
+
+        guard indexOptions.semanticClusters else {
+            skipToFullFolderSlicer()
+            return
+        }
+
+        AppExitState.hasVolatileIndex = true
+        flowStage = .indexing
+
+        let folders = folderManager.selectedFolders
+        let options = indexOptions
+        let processedFiles = processedFiles
+
+        indexingTask = Task {
+            await scannerService.scan(folders: folders, processedFiles: processedFiles)
+            guard !Task.isCancelled else { return }
+
+            await indexService.buildIndex(files: scannerService.mediaFiles, options: options)
+            guard !Task.isCancelled else { return }
+
+            await MainActor.run {
+                if case .done = indexService.phase {
+                    flowStage = .clusters
+                }
+            }
+        }
+    }
+
+    private func returnToIndexingOptions() {
+        indexingTask?.cancel()
+        indexingTask = nil
+        scannerService.clear()
+        indexService.clusters = []
+        indexService.embedderName = ""
+        indexService.phase = .idle
+        AppExitState.hasVolatileIndex = false
+        selectedCluster = nil
+        flowStage = .indexingOptions
+    }
+
+    private func skipToFullFolderSlicer() {
+        indexingTask?.cancel()
+        indexingTask = nil
+        selectedCluster = nil
+        scannerService.clear()
+        indexService.phase = .idle
+        AppExitState.hasVolatileIndex = false
+        flowStage = .slicingFullFolder
+    }
+
+    private func returnToClusters() {
+        scannerService.clear()
+        selectedCluster = nil
+        AppExitState.hasVolatileIndex = !indexService.clusters.isEmpty
+        flowStage = .clusters
+    }
+
+    private func requestReturnToMenu() {
+        if requiresExitConfirmation {
+            showExitConfirmation = true
+        } else {
+            completeReturnToMenu()
+        }
+    }
+
+    private func closeFolderWithoutConfirmation() {
+        completeReturnToMenu()
+    }
+
+    private func completeReturnToMenu() {
+        indexingTask?.cancel()
+        indexingTask = nil
+        actionService.purgeStaged()
+        scannerService.clear()
+        indexService.cancel()
+        indexService.clusters = []
+        indexService.embedderName = ""
+        indexService.phase = .idle
+        AppExitState.hasVolatileIndex = false
+        selectedCluster = nil
+        indexOptions = IndexOptions()
+        flowStage = .indexingOptions
+        folderManager.clearFolders()
+    }
+}
+
+private struct IndexingProgressView: View {
+    var scannerService: ScannerService
+    var indexService: IndexService
+    var onRetry: () -> Void
+    var onBackToOptions: () -> Void
+    var onSkipToFullFolder: () -> Void
+    var onCloseFolder: () -> Void
+
+    private var progressValue: Double? {
+        if scannerService.isScanning {
+            return nil
+        }
+
+        switch indexService.phase {
+        case let .embedding(done, total) where total > 0:
+            return Double(done) / Double(total)
+        case .done:
+            return 1
+        default:
+            return nil
+        }
+    }
+
+    private var statusText: String {
+        if scannerService.isScanning {
+            return "Scanning folder for media…"
+        }
+
+        switch indexService.phase {
+        case .idle:
+            return "Preparing index…"
+        case .preparing:
+            return "Preparing local embedder…"
+        case let .embedding(done, total):
+            return "Embedding media locally (\(done)/\(total))…"
+        case .clustering:
+            return "Clustering similar media…"
+        case .done:
+            return "Index complete."
+        case let .failed(message):
+            return "Indexing failed: \(message)"
+        case .cancelled:
+            return "Indexing cancelled."
+        }
+    }
+
+    private var canRecover: Bool {
+        if scannerService.isScanning { return false }
+
+        switch indexService.phase {
+        case .failed, .cancelled:
+            return true
+        default:
+            return false
+        }
+    }
+
+    var body: some View {
+        CenteredScrollContainer(maxContentWidth: 560) {
+            VStack(spacing: 22) {
+                Text("Building Local Index")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(.themeText)
+
+                Text(statusText)
+                    .font(.system(size: 14))
+                    .foregroundColor(.themeSecondaryText)
+                    .multilineTextAlignment(.center)
+
+                if let progressValue {
+                    ProgressView(value: progressValue)
+                        .progressViewStyle(.linear)
+                } else {
+                    ProgressView()
+                        .progressViewStyle(.linear)
+                }
+
+                if !indexService.embedderName.isEmpty {
+                    Text("Embedder: \(indexService.embedderName)")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.themeSecondaryText)
+                }
+
+                if canRecover {
+                    VStack(spacing: 10) {
+                        HStack(spacing: 12) {
+                            Button("Retry", action: onRetry)
+                                .buttonStyle(.borderedProminent)
+                            Button("Back to Options", action: onBackToOptions)
+                            Button("Slice Full Folder", action: onSkipToFullFolder)
+                        }
+
+                        Button("Close Folder", role: .destructive, action: onCloseFolder)
+                    }
+                    .padding(.top, 8)
+                } else {
+                    Button("Close Folder", action: onCloseFolder)
+                        .padding(.top, 8)
+                }
+            }
+            .padding(24)
+            .cardSurface(cornerRadius: 20, fill: .themeCard)
+        }
+        .background(Color.themeBackground)
     }
 }
 

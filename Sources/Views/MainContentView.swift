@@ -11,11 +11,16 @@ struct MainContentView: View {
     var scannerService: ScannerService
     var actionService: ActionService
     var processedFiles: [ProcessedFile]
+    var initialFiles: [URL]? = nil
+    var onRequestReturnToMenu: (() -> Void)? = nil
+    var onRequestBackToClusters: (() -> Void)? = nil
     
     @State private var flashColor: Color = .clear
     @State private var flashOpacity: Double = 0.0
     @State private var showShortcuts: Bool = false
     @State private var isHoveringHelp: Bool = false
+    @State private var hasLoadedQueue = false
+    @State private var didAutoReturnToClusters = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -53,6 +58,18 @@ struct MainContentView: View {
                         Spacer(minLength: 16)
 
                         HStack(spacing: 10) {
+                            if let onRequestBackToClusters {
+                                Button(action: onRequestBackToClusters) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.themeText)
+                                }
+                                .buttonStyle(.bordered)
+                                .buttonBorderShape(.circle)
+                                .controlSize(.large)
+                                .help("Back to clusters")
+                            }
+
                             Button(action: {
                                 showShortcuts.toggle()
                             }) {
@@ -142,7 +159,19 @@ struct MainContentView: View {
 
             } else {
                 VStack {
-                        HStack {
+                        HStack(spacing: 10) {
+                            if let onRequestBackToClusters {
+                                Button(action: onRequestBackToClusters) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.themeText)
+                                }
+                                .buttonStyle(.bordered)
+                                .buttonBorderShape(.circle)
+                                .controlSize(.large)
+                                .help("Back to clusters")
+                            }
+
                             Button(action: {
                                 returnToMenu()
                             }) {
@@ -153,12 +182,13 @@ struct MainContentView: View {
                             .buttonStyle(.bordered)
                             .buttonBorderShape(.circle)
                             .controlSize(.large)
-                            .padding(.horizontal, 20)
-                            .padding(.top, 36)
-                            .padding(.bottom, 20)
+                            .help("Close folder")
                             
                             Spacer()
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 36)
+                        .padding(.bottom, 20)
                         
                         Spacer()
                         
@@ -174,10 +204,19 @@ struct MainContentView: View {
                         
                         Button(action: {
                             Task {
-                                await scannerService.scan(folders: folderManager.selectedFolders, processedFiles: processedFiles)
+                                hasLoadedQueue = false
+                                didAutoReturnToClusters = false
+                                if let initialFiles {
+                                    scannerService.load(files: initialFiles, processedFiles: processedFiles)
+                                } else {
+                                    await scannerService.scan(folders: folderManager.selectedFolders, processedFiles: processedFiles)
+                                }
+                                scannerService.ensureSelectionValid()
+                                hasLoadedQueue = true
+                                autoReturnToClustersIfNeeded()
                             }
                         }) {
-                            Text("Rescan")
+                            Text(initialFiles == nil ? "Rescan" : "Reload Selection")
                         }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
@@ -189,16 +228,31 @@ struct MainContentView: View {
         }
         .onAppear {
             Task {
-                await scannerService.scan(folders: folderManager.selectedFolders, processedFiles: processedFiles)
+                hasLoadedQueue = false
+                didAutoReturnToClusters = false
+                if let initialFiles {
+                    scannerService.load(files: initialFiles, processedFiles: processedFiles)
+                } else {
+                    await scannerService.scan(folders: folderManager.selectedFolders, processedFiles: processedFiles)
+                }
                 scannerService.ensureSelectionValid()
+                hasLoadedQueue = true
+                autoReturnToClustersIfNeeded()
             }
+        }
+        .onChange(of: scannerService.mediaFiles.count) { _, _ in
+            autoReturnToClustersIfNeeded()
         }
     }
     
-    /// Commit staged deletions to the system Trash, then return to the menu.
+    /// Request returning to the menu; the parent flow may confirm before purging staged deletions.
     private func returnToMenu() {
-        actionService.purgeStaged()
-        folderManager.clearFolders()
+        if let onRequestReturnToMenu {
+            onRequestReturnToMenu()
+        } else {
+            actionService.purgeStaged()
+            folderManager.clearFolders()
+        }
     }
 
     private func triggerFlash(color: Color) {
@@ -207,6 +261,20 @@ struct MainContentView: View {
         flashOpacity = 0.35
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
             flashOpacity = 0.0
+        }
+    }
+
+    private func autoReturnToClustersIfNeeded() {
+        guard initialFiles != nil,
+              onRequestBackToClusters != nil,
+              hasLoadedQueue,
+              !didAutoReturnToClusters,
+              !scannerService.isScanning,
+              scannerService.mediaFiles.isEmpty else { return }
+
+        didAutoReturnToClusters = true
+        DispatchQueue.main.async {
+            onRequestBackToClusters?()
         }
     }
     

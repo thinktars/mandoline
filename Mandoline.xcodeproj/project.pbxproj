@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		IDXB00000000000000000001 /* ImageEmbedder.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000001 /* ImageEmbedder.swift */; };
+		IDXB00000000000000000002 /* IndexService.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000002 /* IndexService.swift */; };
+		IDXB00000000000000000003 /* VisionFeaturePrintEmbedder.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000003 /* VisionFeaturePrintEmbedder.swift */; };
+		IDXB00000000000000000004 /* CLIPEmbedder.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000004 /* CLIPEmbedder.swift */; };
+		IDXB00000000000000000005 /* ClusterMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000005 /* ClusterMath.swift */; };
+		IDXB00000000000000000006 /* IndexingOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000006 /* IndexingOptionsView.swift */; };
+		IDXB00000000000000000007 /* ClusterCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000007 /* ClusterCanvasView.swift */; };
 		09A0F64AFA3EDC1721C3BDEF /* ScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6E238C620CE5B4963865CC /* ScannerService.swift */; };
 		1DED4B36A9728E20F6AAADA5 /* ProcessedFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */; };
 		31ECC61489E6A04C66B7E318 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D3730FFDE66D906A45CC759 /* Assets.xcassets */; };
@@ -25,6 +32,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		IDX000000000000000000001 /* ImageEmbedder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEmbedder.swift; sourceTree = "<group>"; };
+		IDX000000000000000000002 /* IndexService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexService.swift; sourceTree = "<group>"; };
+		IDX000000000000000000003 /* VisionFeaturePrintEmbedder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionFeaturePrintEmbedder.swift; sourceTree = "<group>"; };
+		IDX000000000000000000004 /* CLIPEmbedder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIPEmbedder.swift; sourceTree = "<group>"; };
+		IDX000000000000000000005 /* ClusterMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterMath.swift; sourceTree = "<group>"; };
+		IDX000000000000000000006 /* IndexingOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexingOptionsView.swift; sourceTree = "<group>"; };
+		IDX000000000000000000007 /* ClusterCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterCanvasView.swift; sourceTree = "<group>"; };
 		0D3730FFDE66D906A45CC759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		195B7F7C325D5DA1067C560E /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		1C4EA1232DD7D27D49DFA408 /* Mandoline.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mandoline.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -60,6 +74,8 @@
 				6BC9493867B6A1A63469E8D3 /* MediaViewer.swift */,
 				92947600253739DB7665C90A /* OnboardingView.swift */,
 				A1B2C3D4E5F60718293A4B5C /* CenteredScrollContainer.swift */,
+				IDX000000000000000000006 /* IndexingOptionsView.swift */,
+				IDX000000000000000000007 /* ClusterCanvasView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -116,6 +132,11 @@
 				761D240A2D765D2208535813 /* FontLoader.swift */,
 				39B2FB86EF44CCDE778662F6 /* FolderManager.swift */,
 				5B6E238C620CE5B4963865CC /* ScannerService.swift */,
+				IDX000000000000000000001 /* ImageEmbedder.swift */,
+				IDX000000000000000000002 /* IndexService.swift */,
+				IDX000000000000000000003 /* VisionFeaturePrintEmbedder.swift */,
+				IDX000000000000000000004 /* CLIPEmbedder.swift */,
+				IDX000000000000000000005 /* ClusterMath.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -211,8 +232,15 @@
 				CEE21B36FF1529C5FB09E68B /* MediaViewer.swift in Sources */,
 				CAC4BBE974E26FB9C0FFF239 /* OnboardingView.swift in Sources */,
 				0F1E2D3C4B5A69788796A5B4 /* CenteredScrollContainer.swift in Sources */,
+				IDXB00000000000000000006 /* IndexingOptionsView.swift in Sources */,
+				IDXB00000000000000000007 /* ClusterCanvasView.swift in Sources */,
 				1DED4B36A9728E20F6AAADA5 /* ProcessedFile.swift in Sources */,
 				09A0F64AFA3EDC1721C3BDEF /* ScannerService.swift in Sources */,
+				IDXB00000000000000000001 /* ImageEmbedder.swift in Sources */,
+				IDXB00000000000000000002 /* IndexService.swift in Sources */,
+				IDXB00000000000000000003 /* VisionFeaturePrintEmbedder.swift in Sources */,
+				IDXB00000000000000000004 /* CLIPEmbedder.swift in Sources */,
+				IDXB00000000000000000005 /* ClusterMath.swift in Sources */,
 				665EA51FBE0001E9931BCC52 /* Theme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

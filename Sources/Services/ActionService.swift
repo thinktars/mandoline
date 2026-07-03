@@ -21,6 +21,12 @@ final class ActionService {
     /// deletions remain undoable until the user navigates away or quits.
     var history: [ActionRecord] = []
 
+    /// True when leaving the current folder would discard undoable keep/trash
+    /// decisions from this session.
+    var hasUndoProgress: Bool {
+        !history.isEmpty
+    }
+
     /// Roots into which we've created a `.mandoline-staging` directory.
     private var stagedRoots: Set<URL> = []
 

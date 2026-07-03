@@ -18,6 +18,10 @@ final class ScannerService {
     /// Cached per-file sizes (bytes), captured during the scan.
     private var fileSizes: [URL: Int64] = [:]
 
+    /// Identifies the active scan so a cancelled/older task cannot publish over
+    /// a newer scan or a cleared folder session.
+    private var activeScanID: UUID?
+
     /// Size of a specific media file, from the scan cache.
     func size(of url: URL) -> Int64 {
         fileSizes[url.standardizedFileURL] ?? 0
@@ -102,67 +106,139 @@ final class ScannerService {
         selectedURL = url
     }
 
+    func clear() {
+        activeScanID = nil
+        isScanning = false
+        mediaFiles.removeAll()
+        selectedURL = nil
+        totalBytes = 0
+        fileSizes = [:]
+    }
+
+    /// Load a precomputed media subset (for example, a semantic cluster) into
+    /// the same review queue used by the full-folder scanner.
+    func load(files: [URL], processedFiles: [ProcessedFile]) {
+        let processedPaths = Set(processedFiles.map { $0.filePath })
+        var uniqueFiles: [URL] = []
+        var seenPaths: Set<String> = []
+        var sizes: [URL: Int64] = [:]
+
+        for file in files {
+            let standardized = file.standardizedFileURL
+            guard !processedPaths.contains(standardized.path) else { continue }
+            guard FileManager.default.fileExists(atPath: standardized.path) else { continue }
+            guard allowedExtensions.contains(standardized.pathExtension.lowercased()) else { continue }
+            guard !seenPaths.contains(standardized.path) else { continue }
+
+            seenPaths.insert(standardized.path)
+            uniqueFiles.append(standardized)
+            sizes[standardized] = Int64((try? standardized.resourceValues(forKeys: [.fileSizeKey]))?.fileSize ?? 0)
+        }
+
+        uniqueFiles.sort { $0.path < $1.path }
+
+        isScanning = false
+        mediaFiles = uniqueFiles
+        selectedURL = uniqueFiles.first
+        fileSizes = sizes
+        totalBytes = sizes.values.reduce(0, +)
+    }
+
     // Allowed extensions
     private let allowedExtensions: Set<String> = [
         "jpg", "jpeg", "png", "heic", "heif", "gif", "tiff", "webp", "raw", "dng",
         "mp4", "mov", "avi", "mkv", "webm", "m4v"
     ]
-    
+
     func scan(folders: [URL], processedFiles: [ProcessedFile]) async {
         let processedPaths = Set(processedFiles.map { $0.filePath })
-        
+        let scanID = UUID()
+
         await MainActor.run {
+            self.activeScanID = scanID
             self.isScanning = true
             self.mediaFiles.removeAll()
             self.selectedURL = nil
             self.totalBytes = 0
             self.fileSizes = [:]
         }
-        
+
         var newMedia: [URL] = []
         var sizes: [URL: Int64] = [:]
-        
-        for folder in folders {
-            guard let enumerator = FileManager.default.enumerator(
-                at: folder,
-                includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey],
-                options: [.skipsHiddenFiles, .skipsPackageDescendants]
-            ) else { continue }
-            
-            for case let fileURL as URL in enumerator {
-                // Yield to keep UI responsive if needed
-                await Task.yield()
-                
-                do {
-                    let resourceValues = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
-                    guard resourceValues.isRegularFile == true else { continue }
-                    
-                    let ext = fileURL.pathExtension.lowercased()
-                    if allowedExtensions.contains(ext) {
-                        if !processedPaths.contains(fileURL.path) {
-                            newMedia.append(fileURL)
-                            sizes[fileURL.standardizedFileURL] = Int64(resourceValues.fileSize ?? 0)
+
+        do {
+            try Task.checkCancellation()
+
+            for folder in folders {
+                try Task.checkCancellation()
+
+                guard let enumerator = FileManager.default.enumerator(
+                    at: folder,
+                    includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey],
+                    options: [.skipsHiddenFiles, .skipsPackageDescendants]
+                ) else { continue }
+
+                while let fileURL = enumerator.nextObject() as? URL {
+                    try Task.checkCancellation()
+                    // Yield to keep UI responsive if needed
+                    await Task.yield()
+                    try Task.checkCancellation()
+
+                    do {
+                        let resourceValues = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+                        guard resourceValues.isRegularFile == true else { continue }
+
+                        let ext = fileURL.pathExtension.lowercased()
+                        if allowedExtensions.contains(ext) {
+                            let standardized = fileURL.standardizedFileURL
+                            if !processedPaths.contains(standardized.path) {
+                                newMedia.append(standardized)
+                                sizes[standardized] = Int64(resourceValues.fileSize ?? 0)
+                            }
                         }
+                    } catch {
+                        print("Error reading resource values for \(fileURL): \(error)")
                     }
-                } catch {
-                    print("Error reading resource values for \(fileURL): \(error)")
                 }
             }
-        }
-        
-        // Sort newest first or alphabetically? Let's just shuffle or do randomly for serendipity?
-        // Let's sort alphabetically for predictability.
-        newMedia.sort(by: { $0.path < $1.path })
-        
-        let finalMedia = newMedia.map { $0.standardizedFileURL }
-        let finalSizes = sizes
-        let total = finalSizes.values.reduce(0, +)
-        await MainActor.run {
-            self.mediaFiles = finalMedia
-            self.fileSizes = finalSizes
-            self.totalBytes = total
-            self.selectedURL = self.mediaFiles.first
-            self.isScanning = false
+
+            try Task.checkCancellation()
+
+            // Sort newest first or alphabetically? Let's just shuffle or do randomly for serendipity?
+            // Let's sort alphabetically for predictability.
+            newMedia.sort(by: { $0.path < $1.path })
+
+            let finalMedia = newMedia
+            let finalSizes = sizes
+            let total = finalSizes.values.reduce(0, +)
+            try Task.checkCancellation()
+
+            await MainActor.run {
+                guard self.activeScanID == scanID, !Task.isCancelled else {
+                    if self.activeScanID == scanID {
+                        self.isScanning = false
+                    }
+                    return
+                }
+
+                self.mediaFiles = finalMedia
+                self.fileSizes = finalSizes
+                self.totalBytes = total
+                self.selectedURL = self.mediaFiles.first
+                self.isScanning = false
+            }
+        } catch is CancellationError {
+            await MainActor.run {
+                if self.activeScanID == scanID {
+                    self.isScanning = false
+                }
+            }
+        } catch {
+            await MainActor.run {
+                if self.activeScanID == scanID {
+                    self.isScanning = false
+                }
+            }
         }
     }
 }

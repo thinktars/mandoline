@@ -7,6 +7,7 @@ extension Color {
     static let themeText = Color(red: 0.176, green: 0.176, blue: 0.176) // #2D2D2D Text (Primary)
     static let themeSecondaryText = Color(red: 0.431, green: 0.431, blue: 0.443) // #6E6E71 Text (Secondary)
     static let themeButtonSurface = Color(red: 0.894, green: 0.898, blue: 0.910) // #E4E5E8 Button Surface — cool grey
+    static let themeCard = Color.white
     static let themeBorder = Color(red: 0.839, green: 0.847, blue: 0.863) // #D6D8DC Border / Divider — cool grey
     static let themeSuccess = Color(red: 0.298, green: 0.686, blue: 0.314) // #4CAF50 Success
     static let themeDanger = Color(red: 0.898, green: 0.451, blue: 0.451) // #E57373 Error/Danger

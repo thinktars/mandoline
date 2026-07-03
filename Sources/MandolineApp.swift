@@ -46,6 +46,9 @@ struct MandolineApp: App {
                 if folderManager.recentFolders.isEmpty {
                     Button("No recent folders") {}
                         .disabled(true)
+                } else if !folderManager.selectedFolders.isEmpty {
+                    Button("Close current folder first") {}
+                        .disabled(true)
                 } else {
                     ForEach(folderManager.recentFolders, id: \.self) { url in
                         Button(url.lastPathComponent) {
@@ -87,11 +90,39 @@ struct CheckForUpdatesView: View {
     }
 }
 
+/// Shared app-exit state for volatile, in-memory indexing work. This avoids
+/// threading the SwiftUI gallery state through the AppDelegate solely for Cmd-Q.
+enum AppExitState {
+    static var hasVolatileIndex = false
+}
+
 /// Purges any files Mandoline staged for deletion when the app quits, moving
 /// them to the system Trash (Option B: session-scoped undo, commit on exit).
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         true
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        let hasUndoProgress = ActionService.current?.hasUndoProgress ?? false
+        guard AppExitState.hasVolatileIndex || hasUndoProgress else {
+            return .terminateNow
+        }
+
+        let alert = NSAlert()
+        alert.messageText = "Quit Mandoline?"
+        alert.informativeText = "The in-memory index and undo progress will be lost. Any staged deletions will be moved to Trash when Mandoline quits."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Quit")
+        alert.addButton(withTitle: "Cancel")
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            ActionService.current?.purgeStaged()
+            AppExitState.hasVolatileIndex = false
+            return .terminateNow
+        }
+
+        return .terminateCancel
     }
 
     func applicationWillTerminate(_ notification: Notification) {
