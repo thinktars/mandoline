@@ -2,9 +2,9 @@ import SwiftUI
 import AppKit
 
 // Configures the host NSWindow so the titlebar is a seamless part of the UI:
-// fully transparent with no title, no separator line, and draggable from the
-// background. The visible "current folder" label is drawn in SwiftUI instead
-// of the native title so it can be centered and color-matched to the content.
+// fully transparent with no title and no separator line. Window dragging is
+// handled by a narrow explicit titlebar drag region instead of making the whole
+// SwiftUI background draggable, because that steals canvas drag gestures.
 struct WindowConfigurator: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
@@ -25,7 +25,26 @@ struct WindowConfigurator: NSViewRepresentable {
         window.titlebarSeparatorStyle = .none
         window.titleVisibility = .hidden
         window.title = ""
-        window.isMovableByWindowBackground = true
+        window.isMovableByWindowBackground = false
+    }
+}
+
+/// A narrow AppKit-backed drag strip for the hidden titlebar area. Keeping this
+/// explicit prevents canvas/card drags from becoming whole-window drags while
+/// still preserving native-feeling window movement from the top chrome.
+struct WindowDragRegion: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        TitlebarDragView()
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
+private final class TitlebarDragView: NSView {
+    override var mouseDownCanMoveWindow: Bool { false }
+
+    override func mouseDown(with event: NSEvent) {
+        window?.performDrag(with: event)
     }
 }
 

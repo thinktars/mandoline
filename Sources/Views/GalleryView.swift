@@ -8,6 +8,7 @@ struct GalleryView: View {
     @State private var scannerService = ScannerService()
     @State private var actionService = ActionService()
     @State private var indexService = IndexService()
+    @State private var indexStore = IndexStore()
 
     @Query private var processedFiles: [ProcessedFile]
 
@@ -17,6 +18,8 @@ struct GalleryView: View {
     @State private var selectedCluster: MediaCluster?
     @State private var indexingTask: Task<Void, Never>?
     @State private var showExitConfirmation = false
+    @State private var activeSavedIndexID: UUID?
+    @State private var indexOpenError: String?
 
     private enum FlowStage {
         case indexingOptions
@@ -45,7 +48,11 @@ struct GalleryView: View {
                     hasAcceptedOnboarding = true
                 }
             } else if folderManager.selectedFolders.isEmpty {
-                FolderSelectionView(folderManager: folderManager)
+                FolderSelectionView(
+                    folderManager: folderManager,
+                    indexStore: indexStore,
+                    onOpenIndex: openSavedIndex
+                )
             } else {
                 activeFolderView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -57,6 +64,11 @@ struct GalleryView: View {
             }
         }
         .background(WindowConfigurator())
+        .overlay(alignment: .top) {
+            WindowDragRegion()
+                .frame(height: 30)
+                .frame(maxWidth: .infinity)
+        }
         .overlay(alignment: .top) {
             if !windowTitle.isEmpty {
                 Text(windowTitle)
@@ -76,7 +88,15 @@ struct GalleryView: View {
                 completeReturnToMenu()
             }
         } message: {
-            Text("The in-memory index and undo progress will be lost. Any staged deletions will be moved to Trash on exit/menu.")
+            Text("Your saved index will remain available. Any staged deletions will be moved to Trash on exit/menu.")
+        }
+        .alert("Could Not Open Index", isPresented: Binding(
+            get: { indexOpenError != nil },
+            set: { if !$0 { indexOpenError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(indexOpenError ?? "Unknown error")
         }
         .ignoresSafeArea(.container, edges: .top)
     }
@@ -116,7 +136,11 @@ struct GalleryView: View {
                 },
                 onSliceFullFolder: skipToFullFolderSlicer,
                 onBackToOptions: returnToIndexingOptions,
-                onCloseFolder: requestReturnToMenu
+                onCloseFolder: requestReturnToMenu,
+                processedPaths: Set(processedFiles.map { $0.filePath }),
+                onMoveCluster: { _, _ in
+                    persistActiveIndexLayout()
+                }
             )
 
         case .slicingFullFolder:
@@ -145,13 +169,47 @@ struct GalleryView: View {
     }
 
     private var requiresExitConfirmation: Bool {
-        let hasIndex = flowStage == .indexing || !indexService.clusters.isEmpty || !indexService.embedderName.isEmpty
-        return hasIndex || actionService.hasUndoProgress
+        flowStage == .indexing || AppExitState.hasVolatileIndex || actionService.hasUndoProgress
+    }
+
+    private func openSavedIndex(_ summary: SavedIndexSummary) {
+        indexingTask?.cancel()
+        indexingTask = nil
+        actionService.purgeStaged()
+        scannerService.clear()
+        selectedCluster = nil
+
+        do {
+            let result = try indexStore.openIndex(summary)
+            folderManager.openSavedIndex(folderRoots: result.folderRoots)
+            indexService.load(savedIndex: result.index)
+            activeSavedIndexID = result.index.summary.id
+            indexOptions = IndexOptions()
+            AppExitState.hasVolatileIndex = false
+            flowStage = .clusters
+        } catch {
+            indexOpenError = error.localizedDescription
+        }
+    }
+
+    private func persistActiveIndexLayout() {
+        guard activeSavedIndexID != nil, !folderManager.selectedFolders.isEmpty else { return }
+        do {
+            let summary = try indexStore.saveIndex(
+                folderRoots: folderManager.selectedFolders,
+                clusters: indexService.clusters,
+                embedderName: indexService.embedderName
+            )
+            activeSavedIndexID = summary.id
+        } catch {
+            print("[Mandoline] Failed to persist cluster layout: \(error)")
+        }
     }
 
     private func startIndexing() {
         indexingTask?.cancel()
         selectedCluster = nil
+        activeSavedIndexID = nil
 
         guard indexOptions.semanticClusters else {
             skipToFullFolderSlicer()
@@ -169,12 +227,24 @@ struct GalleryView: View {
             await scannerService.scan(folders: folders, processedFiles: processedFiles)
             guard !Task.isCancelled else { return }
 
-            await indexService.buildIndex(files: scannerService.mediaFiles, options: options)
+            await indexService.buildIndex(files: scannerService.mediaFiles, folderRoots: folders, options: options)
             guard !Task.isCancelled else { return }
 
             await MainActor.run {
                 if case .done = indexService.phase {
-                    flowStage = .clusters
+                    do {
+                        let summary = try indexStore.saveIndex(
+                            folderRoots: folders,
+                            clusters: indexService.clusters,
+                            embedderName: indexService.embedderName
+                        )
+                        activeSavedIndexID = summary.id
+                        AppExitState.hasVolatileIndex = false
+                        flowStage = .clusters
+                    } catch {
+                        AppExitState.hasVolatileIndex = true
+                        indexService.phase = .failed("Index built but could not be saved: \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -189,6 +259,7 @@ struct GalleryView: View {
         indexService.phase = .idle
         AppExitState.hasVolatileIndex = false
         selectedCluster = nil
+        activeSavedIndexID = nil
         flowStage = .indexingOptions
     }
 
@@ -205,7 +276,7 @@ struct GalleryView: View {
     private func returnToClusters() {
         scannerService.clear()
         selectedCluster = nil
-        AppExitState.hasVolatileIndex = !indexService.clusters.isEmpty
+        AppExitState.hasVolatileIndex = false
         flowStage = .clusters
     }
 
@@ -232,6 +303,7 @@ struct GalleryView: View {
         indexService.phase = .idle
         AppExitState.hasVolatileIndex = false
         selectedCluster = nil
+        activeSavedIndexID = nil
         indexOptions = IndexOptions()
         flowStage = .indexingOptions
         folderManager.clearFolders()
@@ -252,6 +324,8 @@ private struct IndexingProgressView: View {
         }
 
         switch indexService.phase {
+        case let .clipIndexing(_, done?, total?) where total > 0:
+            return Double(done) / Double(total)
         case let .embedding(done, total) where total > 0:
             return Double(done) / Double(total)
         case .done:
@@ -270,7 +344,9 @@ private struct IndexingProgressView: View {
         case .idle:
             return "Preparing index…"
         case .preparing:
-            return "Preparing local embedder…"
+            return "Preparing local index…"
+        case let .clipIndexing(message, _, _):
+            return message
         case let .embedding(done, total):
             return "Embedding media locally (\(done)/\(total))…"
         case .clustering:
@@ -346,91 +422,284 @@ private struct IndexingProgressView: View {
 }
 
 struct FolderSelectionView: View {
+    private enum LibrarySection: String, CaseIterable, Hashable {
+        case recents = "Recents"
+        case indexes = "Indexes"
+    }
+
     var folderManager: FolderManager
-    
+    var indexStore: IndexStore
+    var onOpenIndex: (SavedIndexSummary) -> Void
+
+    @State private var selectedSection: LibrarySection = .recents
+    @State private var pendingIndexDelete: SavedIndexSummary?
+    @State private var deletionError: String?
+
+    private var displayedIndexes: [SavedIndexSummary] {
+        Array(indexStore.savedIndexes.prefix(3))
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            CenteredScrollContainer(maxContentWidth: 520) {
-            VStack(spacing: 24) {
-                Text("Welcome to Mandoline")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(.themeText)
-                    .multilineTextAlignment(.center)
-                    .staggeredReveal(0)
-                    
-                Text("Pick a folder to scan. Subfolders are included automatically.")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.themeText)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .staggeredReveal(1)
-                
-                Button(action: {
-                    folderManager.selectFolder()
-                }) {
-                    Text("Choose Folders...")
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .padding(.top, 4)
-                .staggeredReveal(2)
+            CenteredScrollContainer(maxContentWidth: 560) {
+                VStack(spacing: 24) {
+                    Text("Welcome to Mandoline")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundColor(.themeText)
+                        .multilineTextAlignment(.center)
+                        .staggeredReveal(0)
 
-                if !folderManager.displayRecents.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Recently Sliced")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.themeSecondaryText)
-                            .textCase(.uppercase)
-                            .kerning(0.5)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Pick a folder to scan, or reopen a saved index without rebuilding it.")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.themeText)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .staggeredReveal(1)
 
-                        ForEach(folderManager.displayRecents, id: \.self) { url in
-                            Button {
-                                folderManager.openRecent(url)
-                            } label: {
-                                HStack(spacing: 10) {
-                                    Image(systemName: "folder")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.themeSecondaryText)
-                                    VStack(alignment: .leading, spacing: 1) {
-                                        Text(url.lastPathComponent)
-                                            .font(.system(size: 13, weight: .medium))
-                                            .foregroundColor(.themeText)
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
-                                        Text(url.abbreviatedTildePath)
-                                            .font(.system(size: 11, weight: .regular))
-                                            .foregroundColor(.themeSecondaryText)
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
-                                    }
-                                    Spacer(minLength: 8)
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundColor(.themeSecondaryText)
-                                }
-                            }
-                            .buttonStyle(RecentRowButtonStyle())
-                            .contextMenu {
-                                Button("Remove from Recents", role: .destructive) {
-                                    folderManager.removeRecent(url)
-                                }
-                            }
+                    Button(action: {
+                        folderManager.selectFolder()
+                    }) {
+                        Text("Choose Folders...")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .padding(.top, 4)
+                    .staggeredReveal(2)
+
+                    Picker("Library", selection: $selectedSection) {
+                        ForEach(LibrarySection.allCases, id: \.self) { section in
+                            Text(section.rawValue).tag(section)
                         }
                     }
-                    .frame(maxWidth: 360)
-                    .padding(.top, 4)
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 280)
                     .staggeredReveal(3)
+
+                    Group {
+                        switch selectedSection {
+                        case .recents:
+                            recentsList
+                        case .indexes:
+                            indexesList
+                        }
+                    }
+                    .frame(maxWidth: 420)
+                    .padding(.top, 2)
+                    .staggeredReveal(4)
                 }
             }
-        }
 
             StudioCreditLink()
                 .padding(.bottom, 20)
-                .staggeredReveal(4)
+                .staggeredReveal(5)
         }
         .background(Color.themeBackground)
+        .alert(item: $pendingIndexDelete) { summary in
+            Alert(
+                title: Text("Delete saved index?"),
+                message: Text("This removes Mandoline's cached index metadata for \(summary.displayName). Your media files will not be deleted."),
+                primaryButton: .destructive(Text("Delete Index")) {
+                    deleteIndex(summary)
+                },
+                secondaryButton: .cancel()
+            )
+        }
+        .alert("Could Not Delete Index", isPresented: Binding(
+            get: { deletionError != nil },
+            set: { if !$0 { deletionError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(deletionError ?? "Unknown error")
+        }
+    }
+
+    @ViewBuilder
+    private var recentsList: some View {
+        if folderManager.displayRecents.isEmpty {
+            emptyLibraryMessage("No recent folders yet.")
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                sectionTitle("Recently Sliced")
+
+                ForEach(folderManager.displayRecents, id: \.self) { url in
+                    Button {
+                        folderManager.openRecent(url)
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "folder")
+                                .font(.system(size: 14))
+                                .foregroundColor(.themeSecondaryText)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(url.lastPathComponent)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.themeText)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                                Text(url.abbreviatedTildePath)
+                                    .font(.system(size: 11, weight: .regular))
+                                    .foregroundColor(.themeSecondaryText)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                            Spacer(minLength: 8)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.themeSecondaryText)
+                        }
+                    }
+                    .buttonStyle(RecentRowButtonStyle())
+                    .contextMenu {
+                        Button("Remove from Recents", role: .destructive) {
+                            folderManager.removeRecent(url)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var indexesList: some View {
+        if indexStore.savedIndexes.isEmpty {
+            emptyLibraryMessage("No saved indexes yet. Build an index once and it will appear here.")
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    sectionTitle("Saved Indexes")
+                    Spacer()
+                    Text("\(indexStore.savedIndexes.count) indexes · \(byteString(indexStore.savedIndexes.reduce(Int64(0)) { $0 + $1.cachedMetadataBytes })) cache")
+                        .font(.system(size: 11))
+                        .monospacedDigit()
+                        .foregroundColor(.themeSecondaryText)
+                }
+
+                ForEach(displayedIndexes) { summary in
+                    savedIndexRow(summary)
+                }
+
+                if indexStore.savedIndexes.count > displayedIndexes.count {
+                    Menu {
+                        ForEach(indexStore.savedIndexes) { summary in
+                            Button("\(summary.displayName) — \(summary.itemCount) items") {
+                                onOpenIndex(summary)
+                            }
+                        }
+                    } label: {
+                        Label("View More", systemImage: "ellipsis.circle")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .menuStyle(.button)
+                    .buttonStyle(.bordered)
+                    .padding(.top, 4)
+                }
+            }
+        }
+    }
+
+    private func savedIndexRow(_ summary: SavedIndexSummary) -> some View {
+        HStack(spacing: 10) {
+            Button {
+                onOpenIndex(summary)
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "square.stack.3d.up")
+                        .font(.system(size: 14))
+                        .foregroundColor(.themeSecondaryText)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(summary.displayName)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.themeText)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Text(indexSubtitle(summary))
+                            .font(.system(size: 11))
+                            .monospacedDigit()
+                            .foregroundColor(.themeSecondaryText)
+                            .lineLimit(1)
+                        Text(folderPathSummary(summary))
+                            .font(.system(size: 11))
+                            .foregroundColor(.themeSecondaryText)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                    Spacer(minLength: 8)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.themeSecondaryText)
+                }
+            }
+            .buttonStyle(.plain)
+
+            Menu {
+                Button("Open Index") {
+                    onOpenIndex(summary)
+                }
+                Button("Delete Index…", role: .destructive) {
+                    pendingIndexDelete = summary
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .foregroundColor(.themeSecondaryText)
+            }
+            .buttonStyle(.borderless)
+            .fixedSize()
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            Color.themeSubtleBackground.opacity(0.55),
+            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.black.opacity(0.06), lineWidth: 1)
+        )
+    }
+
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(.themeSecondaryText)
+            .textCase(.uppercase)
+            .kerning(0.5)
+    }
+
+    private func emptyLibraryMessage(_ message: String) -> some View {
+        Text(message)
+            .font(.system(size: 12))
+            .foregroundColor(.themeSecondaryText)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(14)
+            .cardSurface(cornerRadius: 12, fill: .themeCard)
+    }
+
+    private func deleteIndex(_ summary: SavedIndexSummary) {
+        do {
+            try indexStore.deleteIndex(summary)
+        } catch {
+            deletionError = error.localizedDescription
+        }
+    }
+
+    private func indexSubtitle(_ summary: SavedIndexSummary) -> String {
+        "\(summary.clusterCount) clusters · \(summary.itemCount) items · \(byteString(summary.totalMediaBytes)) media · \(byteString(summary.cachedMetadataBytes)) index · \(summary.updatedAt.formatted(date: .abbreviated, time: .shortened))"
+    }
+
+    private func folderPathSummary(_ summary: SavedIndexSummary) -> String {
+        guard let first = summary.folderPaths.first else { return "No folder path saved" }
+        let abbreviated = URL(fileURLWithPath: first).abbreviatedTildePath
+        if summary.folderPaths.count == 1 { return abbreviated }
+        return "\(abbreviated) + \(summary.folderPaths.count - 1) more"
+    }
+
+    private func byteString(_ bytes: Int64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = [.useKB, .useMB, .useGB]
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: bytes)
     }
 }
 

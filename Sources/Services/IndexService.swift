@@ -6,9 +6,9 @@ import QuickLookThumbnailing
 
 /// Which index passes the user ticked on the options screen.
 struct IndexOptions: Equatable {
-    /// CLIP/Vision embeddings + k-means clustering (powers the cluster canvas).
+    /// Visual embeddings + k-means clustering (powers the cluster canvas).
     var semanticClusters = true
-    /// Phase 2: zero-shot labels for clusters.
+    /// Phase 2: CLIP helper labels for clusters.
     var autoCategories = false
     /// Phase 3: near-duplicate grouping.
     var nearDuplicates = false
@@ -19,7 +19,7 @@ struct IndexOptions: Equatable {
 /// One cluster of related media, positioned on the 2D canvas.
 struct MediaCluster: Identifiable, Equatable {
     let id: Int
-    /// "Cluster 3" in Phase 1; auto-category name in Phase 2.
+    /// "Cluster 3" in Phase 1; CLIP auto-category name in Phase 2.
     var label: String
     var fileURLs: [URL]
     var totalBytes: Int64
@@ -29,13 +29,15 @@ struct MediaCluster: Identifiable, Equatable {
     var previewURLs: [URL] { Array(fileURLs.prefix(4)) }
 }
 
-/// Builds the in-memory index: decode thumbnails -> embed -> cluster -> project to 2D.
-/// The index intentionally lives only for the session (discarded on close).
+/// Builds and hosts the active index. Auto-categories use the Python CLIP helper JSON;
+/// visual clusters without auto-categories use the Phase 1 Apple Vision path.
+/// Completed indexes are persisted by `IndexStore` and can be restored into this service.
 @Observable
 final class IndexService {
     enum Phase: Equatable {
         case idle
-        case preparing                    // loading embedder
+        case preparing                    // loading embedder/helper
+        case clipIndexing(message: String, done: Int?, total: Int?) // Python CLIP helper progress
         case embedding(done: Int, total: Int)
         case clustering
         case done
@@ -48,15 +50,21 @@ final class IndexService {
     /// Name of the embedder actually used ("CLIP ViT-H/14" or "Apple Vision").
     var embedderName: String = ""
 
-    /// Build the index for `files`. Implemented by the indexing engine (Phase 1).
-    func buildIndex(files: [URL], options: IndexOptions) async {
+    private let clipRunner: CLIPIndexRunner
+
+    init(clipRunner: CLIPIndexRunner = CLIPIndexRunner()) {
+        self.clipRunner = clipRunner
+    }
+
+    /// Build the index for `files`. Implemented by the indexing engine.
+    func buildIndex(files: [URL], folderRoots: [URL] = [], options: IndexOptions) async {
         await MainActor.run {
             phase = .preparing
             clusters = []
             embedderName = ""
         }
 
-        guard options.semanticClusters else {
+        guard options.semanticClusters || options.autoCategories else {
             await MainActor.run {
                 phase = .done
             }
@@ -66,60 +74,10 @@ final class IndexService {
         do {
             try Task.checkCancellation()
 
-            let embedder = await selectEmbedder()
-            await MainActor.run {
-                embedderName = embedder.name
-            }
-
-            let total = files.count
-            var records: [EmbeddedMedia] = []
-            records.reserveCapacity(total)
-
-            for (index, fileURL) in files.enumerated() {
-                try Task.checkCancellation()
-                await MainActor.run {
-                    phase = .embedding(done: index, total: total)
-                }
-
-                guard let image = await Self.thumbnailImage(for: fileURL) else {
-                    await Task.yield()
-                    continue
-                }
-
-                do {
-                    let embedding = try await embedder.embed(image)
-                    let normalizedEmbedding = ClusterMath.normalized(embedding)
-                    guard !normalizedEmbedding.isEmpty else { continue }
-
-                    records.append(
-                        EmbeddedMedia(
-                            url: fileURL.standardizedFileURL,
-                            bytes: Self.fileSize(for: fileURL),
-                            embedding: normalizedEmbedding
-                        )
-                    )
-                } catch is CancellationError {
-                    throw CancellationError()
-                } catch {
-                    // Skip files Vision or Quick Look cannot decode robustly in Phase 1.
-                    continue
-                }
-
-                await Task.yield()
-            }
-
-            try Task.checkCancellation()
-            await MainActor.run {
-                phase = .embedding(done: total, total: total)
-            }
-
-            await MainActor.run {
-                phase = .clustering
-            }
-            let builtClusters = try await Self.makeClusters(from: records)
-            await MainActor.run {
-                clusters = builtClusters
-                phase = .done
+            if options.autoCategories {
+                try await buildCLIPIndex(files: files, folderRoots: folderRoots)
+            } else {
+                try await buildVisionIndex(files: files)
             }
         } catch is CancellationError {
             await MainActor.run {
@@ -136,19 +94,115 @@ final class IndexService {
         phase = .cancelled
     }
 
-    private func selectEmbedder() async -> ImageEmbedder {
-        let clip = CLIPEmbedder()
-        do {
-            try await clip.prepare()
-            return clip
-        } catch {
-            let vision = VisionFeaturePrintEmbedder()
-            do {
-                try await vision.prepare()
-            } catch {
-                // Vision prepare is currently a no-op. Return it so embedding reports real failures.
+    func load(savedIndex: SavedIndex) {
+        clusters = savedIndex.mediaClusters
+        embedderName = savedIndex.summary.embedderName
+        phase = .done
+    }
+
+    func updateClusterPosition(id: Int, position: CGPoint) {
+        guard let index = clusters.firstIndex(where: { $0.id == id }) else { return }
+        clusters[index].position = CGPoint(
+            x: min(max(position.x, 0), 1),
+            y: min(max(position.y, 0), 1)
+        )
+    }
+
+    private func buildCLIPIndex(files: [URL], folderRoots: [URL]) async throws {
+        await MainActor.run {
+            embedderName = "CLIP ViT-H/14"
+            phase = .clipIndexing(message: "Running CLIP auto-categories helper…", done: nil, total: nil)
+        }
+
+        guard !files.isEmpty else {
+            await MainActor.run {
+                clusters = []
+                phase = .done
             }
-            return vision
+            return
+        }
+
+        let result = try await clipRunner.run(inputs: files, folderRoots: folderRoots) { [weak self] progress in
+            Task { @MainActor in
+                self?.phase = .clipIndexing(message: progress.displayMessage, done: progress.done, total: progress.total)
+            }
+        }
+        defer {
+            if result.isTemporaryOutput {
+                try? FileManager.default.removeItem(at: result.outputURL)
+            }
+        }
+        try Task.checkCancellation()
+
+        await MainActor.run {
+            phase = .clipIndexing(message: "Importing CLIP cluster JSON…", done: nil, total: nil)
+        }
+
+        let document = try CLIPIndexParser.decode(contentsOf: result.outputURL)
+        let builtClusters = Self.makeClusters(from: document, restrictingTo: files)
+
+        await MainActor.run {
+            clusters = builtClusters
+            phase = .done
+        }
+    }
+
+    private func buildVisionIndex(files: [URL]) async throws {
+        let embedder = VisionFeaturePrintEmbedder()
+        try await embedder.prepare()
+        await MainActor.run {
+            embedderName = embedder.name
+        }
+
+        let total = files.count
+        var records: [EmbeddedMedia] = []
+        records.reserveCapacity(total)
+
+        for (index, fileURL) in files.enumerated() {
+            try Task.checkCancellation()
+            await MainActor.run {
+                phase = .embedding(done: index, total: total)
+            }
+
+            guard let image = await Self.thumbnailImage(for: fileURL) else {
+                await Task.yield()
+                continue
+            }
+
+            do {
+                let embedding = try await embedder.embed(image)
+                let normalizedEmbedding = ClusterMath.normalized(embedding)
+                guard !normalizedEmbedding.isEmpty else { continue }
+
+                records.append(
+                    EmbeddedMedia(
+                        url: fileURL.standardizedFileURL,
+                        bytes: Self.fileSize(for: fileURL),
+                        embedding: normalizedEmbedding
+                    )
+                )
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                // Skip files Vision or Quick Look cannot decode robustly in Phase 1.
+                continue
+            }
+
+            await Task.yield()
+        }
+
+        try Task.checkCancellation()
+        await MainActor.run {
+            phase = .embedding(done: total, total: total)
+        }
+
+        await MainActor.run {
+            phase = .clustering
+        }
+        let builtClusters = try await Self.makeClusters(from: records)
+        await MainActor.run {
+            clusters = builtClusters
+            phase = .done
         }
     }
 
@@ -178,6 +232,54 @@ final class IndexService {
     private static func fileSize(for url: URL) -> Int64 {
         let values = try? url.resourceValues(forKeys: [.fileSizeKey])
         return Int64(values?.fileSize ?? 0)
+    }
+
+    private static func makeClusters(from document: CLIPIndexDocument, restrictingTo files: [URL]) -> [MediaCluster] {
+        var allowedByPath: [String: URL] = [:]
+        for file in files {
+            let standardized = file.standardizedFileURL
+            allowedByPath[standardized.path] = standardized
+        }
+
+        return document.clusters.compactMap { clipCluster in
+            var urls: [URL] = []
+            var seenPaths: Set<String> = []
+            var totalBytes: Int64 = 0
+
+            for path in clipCluster.paths {
+                let standardizedPath = URL(fileURLWithPath: path).standardizedFileURL.path
+                guard let url = allowedByPath[standardizedPath] else { continue }
+                guard !seenPaths.contains(url.path) else { continue }
+
+                seenPaths.insert(url.path)
+                urls.append(url)
+                totalBytes += fileSize(for: url)
+            }
+
+            guard !urls.isEmpty else { return nil }
+
+            let label = clipCluster.label.trimmingCharacters(in: .whitespacesAndNewlines)
+            return MediaCluster(
+                id: clipCluster.id,
+                label: label.isEmpty ? "Cluster \(clipCluster.id + 1)" : label,
+                fileURLs: urls.sorted { $0.path < $1.path },
+                totalBytes: totalBytes,
+                position: clampedPosition(clipCluster.position.cgPoint)
+            )
+        }
+        .sorted { lhs, rhs in
+            if lhs.fileURLs.count == rhs.fileURLs.count {
+                return lhs.label < rhs.label
+            }
+            return lhs.fileURLs.count > rhs.fileURLs.count
+        }
+    }
+
+    private static func clampedPosition(_ point: CGPoint) -> CGPoint {
+        CGPoint(
+            x: min(1, max(0, point.x)),
+            y: min(1, max(0, point.y))
+        )
     }
 
     private static func makeClusters(from records: [EmbeddedMedia]) async throws -> [MediaCluster] {

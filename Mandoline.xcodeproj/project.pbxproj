@@ -14,6 +14,9 @@
 		IDXB00000000000000000005 /* ClusterMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000005 /* ClusterMath.swift */; };
 		IDXB00000000000000000006 /* IndexingOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000006 /* IndexingOptionsView.swift */; };
 		IDXB00000000000000000007 /* ClusterCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000007 /* ClusterCanvasView.swift */; };
+		IDXB00000000000000000008 /* CLIPIndexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000008 /* CLIPIndexModels.swift */; };
+		IDXB00000000000000000009 /* CLIPIndexRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000009 /* CLIPIndexRunner.swift */; };
+		IDXB00000000000000000010 /* IndexStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = IDX000000000000000000010 /* IndexStore.swift */; };
 		09A0F64AFA3EDC1721C3BDEF /* ScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6E238C620CE5B4963865CC /* ScannerService.swift */; };
 		1DED4B36A9728E20F6AAADA5 /* ProcessedFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D236C3C9E177A2DCAD25CC /* ProcessedFile.swift */; };
 		31ECC61489E6A04C66B7E318 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D3730FFDE66D906A45CC759 /* Assets.xcassets */; };
@@ -39,6 +42,9 @@
 		IDX000000000000000000005 /* ClusterMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterMath.swift; sourceTree = "<group>"; };
 		IDX000000000000000000006 /* IndexingOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexingOptionsView.swift; sourceTree = "<group>"; };
 		IDX000000000000000000007 /* ClusterCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterCanvasView.swift; sourceTree = "<group>"; };
+		IDX000000000000000000008 /* CLIPIndexModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIPIndexModels.swift; sourceTree = "<group>"; };
+		IDX000000000000000000009 /* CLIPIndexRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIPIndexRunner.swift; sourceTree = "<group>"; };
+		IDX000000000000000000010 /* IndexStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexStore.swift; sourceTree = "<group>"; };
 		0D3730FFDE66D906A45CC759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		195B7F7C325D5DA1067C560E /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		1C4EA1232DD7D27D49DFA408 /* Mandoline.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mandoline.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -134,8 +140,11 @@
 				5B6E238C620CE5B4963865CC /* ScannerService.swift */,
 				IDX000000000000000000001 /* ImageEmbedder.swift */,
 				IDX000000000000000000002 /* IndexService.swift */,
+				IDX000000000000000000010 /* IndexStore.swift */,
 				IDX000000000000000000003 /* VisionFeaturePrintEmbedder.swift */,
 				IDX000000000000000000004 /* CLIPEmbedder.swift */,
+				IDX000000000000000000008 /* CLIPIndexModels.swift */,
+				IDX000000000000000000009 /* CLIPIndexRunner.swift */,
 				IDX000000000000000000005 /* ClusterMath.swift */,
 			);
 			path = Services;
@@ -238,8 +247,11 @@
 				09A0F64AFA3EDC1721C3BDEF /* ScannerService.swift in Sources */,
 				IDXB00000000000000000001 /* ImageEmbedder.swift in Sources */,
 				IDXB00000000000000000002 /* IndexService.swift in Sources */,
+				IDXB00000000000000000010 /* IndexStore.swift in Sources */,
 				IDXB00000000000000000003 /* VisionFeaturePrintEmbedder.swift in Sources */,
 				IDXB00000000000000000004 /* CLIPEmbedder.swift in Sources */,
+				IDXB00000000000000000008 /* CLIPIndexModels.swift in Sources */,
+				IDXB00000000000000000009 /* CLIPIndexRunner.swift in Sources */,
 				IDXB00000000000000000005 /* ClusterMath.swift in Sources */,
 				665EA51FBE0001E9931BCC52 /* Theme.swift in Sources */,
 			);

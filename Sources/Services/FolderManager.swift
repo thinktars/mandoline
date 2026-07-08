@@ -68,6 +68,18 @@ final class FolderManager {
         }
     }
 
+    /// Adopt folder roots whose security-scoped bookmarks were resolved by a saved index.
+    @MainActor
+    func openSavedIndex(folderRoots: [URL]) {
+        clearFolders()
+        for url in folderRoots {
+            let standardized = url.standardizedFileURL
+            guard !selectedFolders.contains(where: { $0.standardizedFileURL == standardized }) else { continue }
+            selectedFolders.append(standardized)
+            addRecent(standardized)
+        }
+    }
+
     func clearFolders() {
         stopAccessing()
         selectedFolders.removeAll()

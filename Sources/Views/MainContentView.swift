@@ -105,7 +105,7 @@ struct MainContentView: View {
                                     ShortcutRowView(key: "]", action: "Keep", color: .themeSuccess)
                                     ShortcutRowView(key: "Z", action: "Undo", color: .themeSecondaryText)
                                     ShortcutRowView(key: "⏎", action: "Reveal in Finder", color: .themeText)
-                                    ShortcutRowView(key: "Esc", action: "Menu", color: .themeText)
+                                    ShortcutRowView(key: "Esc", action: onRequestBackToClusters == nil ? "Menu" : "Back to clusters", color: .themeText)
                                 }
                                 .padding(16)
                                 .frame(width: 220)
@@ -311,9 +311,11 @@ struct MainContentView: View {
                 // Play rejected sound if there's no history left to undo
                 NSSound(contentsOfFile: "/System/Library/Sounds/Basso.aiff", byReference: true)?.play()
             }
-        case "esc": // Return to menu or close shortcuts
+        case "esc": // Return to clusters/menu or close shortcuts
             if showShortcuts {
                 showShortcuts = false
+            } else if let onRequestBackToClusters {
+                onRequestBackToClusters()
             } else {
                 returnToMenu()
             }

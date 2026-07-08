@@ -7,23 +7,51 @@ struct IndexingOptionsView: View {
     var onSkip: () -> Void
     var onBack: () -> Void
 
+    private var semanticClustersBinding: Binding<Bool> {
+        Binding(
+            get: { options.semanticClusters },
+            set: { newValue in
+                options.semanticClusters = newValue
+                if !newValue {
+                    options.autoCategories = false
+                }
+            }
+        )
+    }
+
+    private var autoCategoriesBinding: Binding<Bool> {
+        Binding(
+            get: { options.autoCategories },
+            set: { newValue in
+                options.autoCategories = newValue
+                if newValue {
+                    options.semanticClusters = true
+                }
+            }
+        )
+    }
+
     var body: some View {
         CenteredScrollContainer(maxContentWidth: 560) {
             VStack(spacing: 24) {
                 Text(folderCount == 1 ? "Index this folder?" : "Index these folders?")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.themeText)
-                Text("Choose which local analysis passes Mandoline should run before slicing. Phase 1 uses on-device Apple Vision embeddings; CLIP is scaffolded for a future model asset.")
+                Text("Choose which local analysis passes Mandoline should run before slicing. Visual clusters use Apple Vision; Auto-categories run the local CLIP Python helper offline by default.")
                     .font(.system(size: 14))
                     .foregroundColor(.themeSecondaryText)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
                 VStack(alignment: .leading, spacing: 14) {
-                    Toggle("Visual similarity clusters", isOn: $options.semanticClusters)
-                        .help("Groups visually similar media locally so you can review one cluster at a time. CLIP-powered semantic labels are planned for a later model asset.")
-                    ComingSoonToggle(title: "Auto-categories", isOn: $options.autoCategories)
-                        .help("Phase 2: labels clusters with on-device AI prompts such as screenshots, documents, receipts, people, and scenery.")
+                    Toggle("Visual similarity clusters", isOn: semanticClustersBinding)
+                        .help("Groups visually similar media locally with Apple Vision so you can review one cluster at a time.")
+                    Toggle("Auto-categories (requires cached CLIP)", isOn: autoCategoriesBinding)
+                        .help("Runs the local CLIP helper offline to label clusters with categories such as screenshots, documents, receipts, people, and scenery. Set MANDOLINE_CLIP_INDEXER_PATH if the helper is outside a development checkout.")
+                    Text("Auto-categories are offline/private from the app and require the Hugging Face/open_clip model to be pre-cached. Run the first setup/download from Terminal using the CLIP README; if setup is unavailable, use Back to Options or Slice Full Folder to recover.")
+                        .font(.system(size: 12))
+                        .foregroundColor(.themeSecondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
                     ComingSoonToggle(title: "Near-duplicates", isOn: $options.nearDuplicates)
                         .help("Phase 3: finds repeated or very similar shots so you can keep one and remove the rest.")
                     ComingSoonToggle(title: "Blur and quality scores", isOn: $options.blurScores)

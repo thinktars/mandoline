@@ -165,6 +165,7 @@ final class ScannerService {
 
         var newMedia: [URL] = []
         var sizes: [URL: Int64] = [:]
+        var seenPaths: Set<String> = []
 
         do {
             try Task.checkCancellation()
@@ -191,7 +192,8 @@ final class ScannerService {
                         let ext = fileURL.pathExtension.lowercased()
                         if allowedExtensions.contains(ext) {
                             let standardized = fileURL.standardizedFileURL
-                            if !processedPaths.contains(standardized.path) {
+                            if !processedPaths.contains(standardized.path), !seenPaths.contains(standardized.path) {
+                                seenPaths.insert(standardized.path)
                                 newMedia.append(standardized)
                                 sizes[standardized] = Int64(resourceValues.fileSize ?? 0)
                             }

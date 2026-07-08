@@ -111,7 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let alert = NSAlert()
         alert.messageText = "Quit Mandoline?"
-        alert.informativeText = "The in-memory index and undo progress will be lost. Any staged deletions will be moved to Trash when Mandoline quits."
+        alert.informativeText = "Saved indexes will remain available. Any staged deletions will be moved to Trash when Mandoline quits."
         alert.alertStyle = .warning
         alert.addButton(withTitle: "Quit")
         alert.addButton(withTitle: "Cancel")
