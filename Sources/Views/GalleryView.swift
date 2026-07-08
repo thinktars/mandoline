@@ -632,19 +632,17 @@ struct FolderSelectionView: View {
             }
             .buttonStyle(.plain)
 
-            Menu {
-                Button("Open Index") {
-                    onOpenIndex(summary)
-                }
-                Button("Delete Index…", role: .destructive) {
-                    pendingIndexDelete = summary
-                }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .foregroundColor(.themeSecondaryText)
+            IndexTrashButton {
+                pendingIndexDelete = summary
             }
-            .buttonStyle(.borderless)
-            .fixedSize()
+        }
+        .contextMenu {
+            Button("Open Index") {
+                onOpenIndex(summary)
+            }
+            Button("Delete Index…", role: .destructive) {
+                pendingIndexDelete = summary
+            }
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
@@ -700,6 +698,33 @@ struct FolderSelectionView: View {
         formatter.allowedUnits = [.useKB, .useMB, .useGB]
         formatter.countStyle = .file
         return formatter.string(fromByteCount: bytes)
+    }
+}
+
+private struct IndexTrashButton: View {
+    var action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(role: .destructive, action: action) {
+            Image(systemName: isHovered ? "trash.fill" : "trash")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(isHovered ? .themeDanger : .themeSecondaryText)
+                .frame(width: 30, height: 30)
+                .background(
+                    Circle()
+                        .fill(isHovered ? Color.themeDanger.opacity(0.10) : Color.clear)
+                )
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .frame(width: 40, height: 40)
+        .help("Delete saved index")
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.12)) {
+                isHovered = hovering
+            }
+        }
     }
 }
 
