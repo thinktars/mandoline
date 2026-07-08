@@ -79,3 +79,6 @@ node_modules/
 
 # Local Pi subagent artifacts
 .pi-subagents/
+
+# Local CLIP helper virtualenv/cache
+.venv-clip/

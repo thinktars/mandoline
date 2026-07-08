@@ -1,0 +1,6 @@
+open_clip_torch
+numpy
+Pillow
+pillow-heif
+torch
+imageio[ffmpeg]
