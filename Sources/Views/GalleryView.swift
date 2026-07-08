@@ -467,14 +467,8 @@ struct FolderSelectionView: View {
                     .padding(.top, 4)
                     .staggeredReveal(2)
 
-                    Picker("Library", selection: $selectedSection) {
-                        ForEach(LibrarySection.allCases, id: \.self) { section in
-                            Text(section.rawValue).tag(section)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(maxWidth: 280)
-                    .staggeredReveal(3)
+                    libraryNav
+                        .staggeredReveal(3)
 
                     Group {
                         switch selectedSection {
@@ -484,8 +478,11 @@ struct FolderSelectionView: View {
                             indexesList
                         }
                     }
-                    .frame(maxWidth: 420)
+                    .frame(maxWidth: 420, minHeight: 340, alignment: .top)
                     .padding(.top, 2)
+                    .transaction { transaction in
+                        transaction.animation = nil
+                    }
                     .staggeredReveal(4)
                 }
             }
@@ -513,6 +510,63 @@ struct FolderSelectionView: View {
         } message: {
             Text(deletionError ?? "Unknown error")
         }
+    }
+
+    private var libraryNav: some View {
+        HStack(alignment: .center, spacing: 14) {
+            Text("Library")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.themeSecondaryText)
+
+            HStack(spacing: 4) {
+                libraryNavButton(.recents, count: folderManager.recentFolders.count)
+                libraryNavButton(.indexes, count: indexStore.savedIndexes.count)
+            }
+            .padding(4)
+            .background(
+                Color.themeSubtleBackground.opacity(0.72),
+                in: Capsule()
+            )
+            .overlay(
+                Capsule()
+                    .strokeBorder(Color.black.opacity(0.06), lineWidth: 1)
+            )
+        }
+        .frame(maxWidth: 420, alignment: .leading)
+    }
+
+    private func libraryNavButton(_ section: LibrarySection, count: Int) -> some View {
+        let isSelected = selectedSection == section
+        return Button {
+            selectedSection = section
+        } label: {
+            HStack(spacing: 6) {
+                Text(section.rawValue)
+                    .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
+                Text("\(count)")
+                    .font(.system(size: 10, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundColor(isSelected ? Color.white.opacity(0.86) : .themeSecondaryText)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(isSelected ? Color.white.opacity(0.18) : Color.black.opacity(0.05))
+                    )
+            }
+            .foregroundColor(isSelected ? .white : .themeText)
+            .padding(.horizontal, 13)
+            .padding(.vertical, 7)
+            .frame(minWidth: 104)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Color.accentColor : Color.clear)
+                    .shadow(color: isSelected ? Color.accentColor.opacity(0.22) : Color.clear, radius: 8, x: 0, y: 4)
+            )
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .help("Show \(section.rawValue.lowercased())")
     }
 
     @ViewBuilder
